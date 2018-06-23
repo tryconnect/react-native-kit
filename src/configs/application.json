@@ -1,0 +1,9 @@
+{
+	"apiDomain": "http://api.gobook.vn/api",	
+	"apiNotification": "https://notifications.itvina.com/api", // api notification
+	"domain": "http://api.gobook.vn/",
+	"googleAnalyticsID": "UA-112873270-1",
+	"itemPerPage": 20, // limit listin
+	"itemPerPageNotification": 10, // limit listin notification
+	"notificationBrandKey": "2e1cb1ff-0f71-4792-9b42-c46925db63bd" // brand key notification
+}

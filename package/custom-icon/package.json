@@ -1,0 +1,19 @@
+{
+  
+  "dependencies": {
+    "react-native-vector-icons": "latest"
+  },
+  "description": "Các icon custom",
+  "devDependencies": {
+    
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "name": "custom-icon",
+  "rnpm": {
+    "assets": [
+      "Fonts"
+    ]
+  },
+  "version": "4.2.0"
+}

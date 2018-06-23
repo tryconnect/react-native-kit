@@ -1,0 +1,17 @@
+{
+  "name": "~/kit",
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "babel-plugin-transform-react-display-name": "^6.25.0",
+    "babel-plugin-transform-react-pure-class-to-function": "^1.0.1",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.13",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "babel-plugin-transform-remove-strict-mode": "0.0.2",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react-native": "4.0.0",
+    "babel-preset-react-native-stage-0": "^1.0.1"
+  }
+}

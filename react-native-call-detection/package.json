@@ -1,0 +1,58 @@
+{
+  "_args": [
+    [
+      "react-native-call-detection@1.6.3",
+      "E:\\Apache24\\htdocs\\IURA\\TestStringee"
+    ]
+  ],
+  "_from": "react-native-call-detection@1.6.3",
+  "_id": "react-native-call-detection@1.6.3",
+  "_inBundle": false,
+  "_integrity": "sha1-Jq7H+v1CfYBkmJ+hyZymuny0vqU=",
+  "_location": "/react-native-call-detection",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "react-native-call-detection@1.6.3",
+    "name": "react-native-call-detection",
+    "escapedName": "react-native-call-detection",
+    "rawSpec": "1.6.3",
+    "saveSpec": null,
+    "fetchSpec": "1.6.3"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-native-call-detection/-/react-native-call-detection-1.6.3.tgz",
+  "_spec": "1.6.3",
+  "_where": "E:\\Apache24\\htdocs\\IURA\\TestStringee",
+  "author": {
+    "name": "Pritesh Nandgaonkar",
+    "email": "prit.nandgaonkar@gmail.com",
+    "url": "https://github.com/priteshrnandgaonkar"
+  },
+  "bugs": {
+    "url": "https://github.com/priteshrnandgaonkar/react-native-call-detection/issues"
+  },
+  "description": "Get different phone call states for iOS and Android along with incoming phone number(just for android)",
+  "homepage": "https://github.com/priteshrnandgaonkar/react-native-call-detection#readme",
+  "keywords": [
+    "react-native",
+    "call",
+    "detection",
+    "iOS",
+    "android"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "react-native-call-detection",
+  "peerDependencies": {
+    "react-native": ">=0.26.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priteshrnandgaonkar/react-native-call-detection.git"
+  },
+  "version": "1.6.3"
+}

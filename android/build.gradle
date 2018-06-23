@@ -1,0 +1,191 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+ext {
+    compileSdkVersion               = 26
+    targetSdkVersion                = 23
+    minSdkVersion                   = 16
+    versionCode                     = 1
+    versionName                     = "0.0.1"
+    applicationId                   = "com.teststringee"
+    appName                         = "TestStringee"
+    componentName                   = "TestStringee"
+    buildToolsVersion               = "26.0.1"
+    supportLibVersion               = "26.1.0"
+    googlePlayServicesVersion       = "15.0.0"
+    androidMapsUtilsVersion         = "0.5+"
+    oreoEXPERIMENTAL                = "yes"
+    reactNativeVersion              = "0.55.4"
+    
+    fb_app_id                       = "com.teststringee.123" // app id của facebook
+    ga_trackingId                   = "UA-112873270-1" // mã google analytic
+    onesignal_app_id                = "86e12be5-4edf-475f-be0e-ce018ec74782" // app onesignal
+    onesignal_google_project_number = "980508651768"
+    code_push_staging_key           = "oFhnF1k3WyCIY0Eca9B-hDUeLVIj072f8768-e0cc-487e-971f-ee119720706b"
+    code_push_production_key        =  "hm8C9ZT9PHasQO1myUQO1yGv00w9072f8768-e0cc-487e-971f-ee119720706b"
+
+    // travisBuild = System.getenv("TRAVIS") == "true"
+    // // allows for -Dpre-dex=false to be set
+    // preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
+}
+
+buildscript {
+    repositories {
+        jcenter()
+
+        // Gradle Plugin Portal 
+        mavenCentral()
+        google()
+        maven {
+           url 'https://maven.fabric.io/public'
+        }
+        maven {
+           url 'https://mvnrepository.com/artifact/io.pristine'
+        }
+        maven { 
+            url 'https://plugins.gradle.org/m2/' 
+        }
+    }
+    dependencies {
+        // classpath 'com.android.tools.build:gradle:2.2.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+
+        classpath 'com.android.tools.build:gradle:3.1.2'
+
+        classpath 'com.google.gms:google-services:3.2.1'
+
+        classpath 'io.fabric.tools:gradle:1.25.4'
+        classpath 'com.google.firebase:firebase-plugins:1.1.5'
+        classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:0.10.1'
+    }
+}
+
+allprojects {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
+
+        // -------------------------------------------------
+        // Add this below the existing maven property above
+        // -------------------------------------------------
+        google()
+        maven {
+            url "https://dl.google.com/dl/android/maven2"
+        }
+        maven {
+            url "https://maven.google.com"
+        }
+        maven {
+            url "https://repo1.maven.org/maven2/io/pristine/libjingle/"
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+
+            // react native
+            force "com.facebook.react:react-native:$rootProject.reactNativeVersion"
+
+            // // react-native-admob
+            // force "com.google.android.gms:play-services-ads:$rootProject.googlePlayServicesVersion"
+            // // react-native-maps
+            // force "com.google.android.gms:play-services:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-base:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-maps:$rootProject.googlePlayServicesVersion"
+            // // react-native-onesignal
+            // force "com.google.android.gms:play-services-gcm:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-analytics:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-location:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-tagmanager-v4-impl-license:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-analytics-impl-license:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-vision-common:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-vision-common-license:$rootProject.googlePlayServicesVersion"
+            // force "com.google.android.gms:play-services-vision:$rootProject.googlePlayServicesVersion"
+            // // react-native-google-sign-in
+            // force "com.google.android.gms:play-services-auth:$rootProject.googlePlayServicesVersion"
+
+            // // react-native-firebase
+            // // force "com.google.firebase:firebase-core:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-messaging:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-crash:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-config:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-auth:$rootProject.googlePlayServicesVersion"
+
+            // // force "com.google.firebase:firebase-analytics-impl:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-analytics-impl-license:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-analytics-license:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-analytics:$rootProject.googlePlayServicesVersion"
+            // // force "com.google.firebase:firebase-messaging-license:$rootProject.googlePlayServicesVersion"
+
+            // // react-native-fbsdk
+            // force "com.facebook.android:facebook-android-sdk:4.32.0"
+            // force "com.facebook.android:facebook-core:4.32.0"
+            // force "com.facebook.android:facebook-common:4.32.0"
+            // force "com.facebook.android:facebook-login:4.32.0"
+            // force "com.facebook.android:facebook-share:4.32.0"
+            // force "com.facebook.android:facebook-places:4.32.0"
+            // force "com.facebook.android:facebook-applinks:4.32.0"
+            // force "com.facebook.android:facebook-messenger:4.32.0"
+            
+            // // android
+            // force "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
+            // force "com.android.support:cardview-v7:$rootProject.supportLibVersion"
+            // force "com.android.support:recyclerview-v7:$rootProject.supportLibVersion"
+            // force "com.android.support:design:$rootProject.supportLibVersion"
+            // force "com.android.support:percent:$rootProject.supportLibVersion"
+            // force "com.android.support:preference-v14:$rootProject.supportLibVersion"
+            // force "com.android.support:customtabs:$rootProject.supportLibVersion"
+            // force "com.android.support:support-annotations:$rootProject.supportLibVersion"
+        }
+        // resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        //     def requested = details.requested
+
+        //     // fore google play service version
+        //     if (
+        //         requested.group == 'com.google.android.gms'
+        //         // || requested.group == 'com.google.firebase'
+        //         // || requested.group == 'react-native-android-sms-listener'
+        //     ) {
+        //         details.useVersion rootProject.googlePlayServicesVersion
+        //     }
+
+        //     // fore multidex android support
+        //     if (requested.group == 'com.android.support') {
+        //         if (!requested.name.startsWith("multidex")) {
+        //             details.useVersion rootProject.supportLibVersion
+        //         }
+        //     }
+        // }
+    }
+}
+
+
+subprojects { subproject ->
+    afterEvaluate{
+
+        if(
+            (subproject.plugins.hasPlugin('android') 
+            || subproject.plugins.hasPlugin('android-library'))
+        ) {
+            android {
+                compileSdkVersion rootProject.compileSdkVersion
+                buildToolsVersion rootProject.buildToolsVersion
+            }
+        }
+
+        // multi dex
+        tasks.matching {
+            it.name.startsWith('dex')
+        }.each { dx ->
+            if (dx.additionalParameters == null) {
+                dx.additionalParameters = ['--multi-dex']
+            } else {
+                dx.additionalParameters += '--multi-dex'
+            }
+        }
+    }
+}
