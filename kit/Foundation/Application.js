@@ -88,11 +88,10 @@ class Application extends Container {
             }
 
             if (this._whenRegisterServiceProviders.has(provide)) {
-
                 const callback = this._whenRegisterServiceProviders.get(provide);
                 this._whenRegisterServiceProviders.delete(provide);
 
-                const register = instance.register;
+                const register = instance.register.bind(instance);
                 instance.register = async () => {
                     await Promise.resolve(register());
                     await Promise.resolve(callback());
@@ -324,6 +323,8 @@ class Application extends Container {
         // gọi callback booted
         fireAppCallbacks(this, this._bootedCallbacks);
         delete this._bootedCallbacks;
+
+        console.log(this._whenRegisterServiceProviders);
     }
 
     /**
