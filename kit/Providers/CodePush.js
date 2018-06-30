@@ -69,8 +69,8 @@ class CodePushService extends ServiceProvider {
                             updatePeriod(1, {
                                 description: "update_installed",
                                 state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                isPending: currentPackage.isPending,
-                                isFirstRun: currentPackage.isFirstRun,
+                                isPending: currentPackage && currentPackage.isPending,
+                                isFirstRun: currentPackage && currentPackage.isFirstRun,
                                 currentPackage,
                                 remotePackage,
                                 updateShouldBeIgnored,
@@ -97,8 +97,8 @@ class CodePushService extends ServiceProvider {
                                         updatePeriod(0.8, {
                                             description: "clear_cache",
                                             state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                            isPending: currentPackage.isPending,
-                                            isFirstRun: currentPackage.isFirstRun,
+                                            isPending: currentPackage && currentPackage.isPending,
+                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
                                             currentPackage,
                                             remotePackage,
                                             updateShouldBeIgnored,
@@ -127,8 +127,8 @@ class CodePushService extends ServiceProvider {
                             updatePeriod(1, {
                                 description: "update_successfully",
                                 state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                isPending: currentPackage.isPending,
-                                isFirstRun: currentPackage.isFirstRun,
+                                isPending: currentPackage && currentPackage.isPending,
+                                isFirstRun: currentPackage && currentPackage.isFirstRun,
                                 currentPackage,
                                 remotePackage,
                                 updateShouldBeIgnored,
@@ -147,20 +147,20 @@ class CodePushService extends ServiceProvider {
                             return;
                         }
                     }
+                    
 
                     // đã là phiên bản mới nhất
                     updatePeriod(1, {
                         description: "up_to_date",
                         state: codePush.SyncStatus.UP_TO_DATE,
-                        isPending: currentPackage.isPending,
-                        isFirstRun: currentPackage.isFirstRun,
+                        isPending: currentPackage && currentPackage.isPending,
+                        isFirstRun: currentPackage && currentPackage.isFirstRun,
                         currentPackage,
                         remotePackage,
                         updateShouldBeIgnored,
                         resolvedInstallMode,
                         minimumBackgroundDuration
                     });
-                    console.log(this);
                     
                     resolve(codePush.SyncStatus.UP_TO_DATE);
                     return;
@@ -182,8 +182,8 @@ class CodePushService extends ServiceProvider {
                         updatePeriod(1, {
                             description: "update_failed",
                             state: codePush.SyncStatus.UNKNOWN_ERROR,
-                            isPending: currentPackage.isPending,
-                            isFirstRun: currentPackage.isFirstRun,
+                            isPending: currentPackage && currentPackage.isPending,
+                            isFirstRun: currentPackage && currentPackage.isFirstRun,
                             currentPackage,
                             remotePackage,
                             updateShouldBeIgnored,
@@ -231,8 +231,8 @@ class CodePushService extends ServiceProvider {
                                                     package: "0%",
                                                     description: "downloading",
                                                     state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
-                                                    isPending: currentPackage.isPending,
-                                                    isFirstRun: currentPackage.isFirstRun,
+                                                    isPending: currentPackage && currentPackage.isPending,
+                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                     currentPackage,
                                                     remotePackage,
                                                     updateShouldBeIgnored,
@@ -254,8 +254,8 @@ class CodePushService extends ServiceProvider {
                                                         receivedBytes: currentByte,
                                                         description: "downloading",
                                                         state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
-                                                        isPending: currentPackage.isPending,
-                                                        isFirstRun: currentPackage.isFirstRun,
+                                                        isPending: currentPackage && currentPackage.isPending,
+                                                        isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                         currentPackage,
                                                         remotePackage,
                                                         updateShouldBeIgnored,
@@ -270,8 +270,8 @@ class CodePushService extends ServiceProvider {
                                                     updatePeriod(0.99, {
                                                         description: "installing_update",
                                                         state: codePush.SyncStatus.INSTALLING_UPDATE,
-                                                        isPending: currentPackage.isPending,
-                                                        isFirstRun: currentPackage.isFirstRun,
+                                                        isPending: currentPackage && currentPackage.isPending,
+                                                        isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                         currentPackage,
                                                         remotePackage,
                                                         updateShouldBeIgnored,
@@ -284,8 +284,8 @@ class CodePushService extends ServiceProvider {
                                                         updatePeriod(0.99, {
                                                             description: "update_installed",
                                                             state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                                            isPending: currentPackage.isPending,
-                                                            isFirstRun: currentPackage.isFirstRun,
+                                                            isPending: currentPackage && currentPackage.isPending,
+                                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                             currentPackage,
                                                             remotePackage,
                                                             updateShouldBeIgnored,
@@ -300,8 +300,8 @@ class CodePushService extends ServiceProvider {
                                                 updatePeriod(1, {
                                                     description: "update_failed",
                                                     state: codePush.SyncStatus.UNKNOWN_ERROR,
-                                                    isPending: currentPackage.isPending,
-                                                    isFirstRun: currentPackage.isFirstRun,
+                                                    isPending: currentPackage && currentPackage.isPending,
+                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                     currentPackage,
                                                     remotePackage,
                                                     updateShouldBeIgnored,
@@ -327,8 +327,8 @@ class CodePushService extends ServiceProvider {
                                             updatePeriod(1, {
                                                 description: "update_ignored",
                                                 state: codePush.SyncStatus.UPDATE_IGNORED,
-                                                isPending: currentPackage.isPending,
-                                                isFirstRun: currentPackage.isFirstRun,
+                                                isPending: currentPackage && currentPackage.isPending,
+                                                isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                 currentPackage,
                                                 remotePackage,
                                                 updateShouldBeIgnored,
@@ -343,8 +343,8 @@ class CodePushService extends ServiceProvider {
                                 updatePeriod(0.1, {
                                     description: "awaiting_user_action",
                                     state: codePush.SyncStatus.AWAITING_USER_ACTION,
-                                    isPending: currentPackage.isPending,
-                                    isFirstRun: currentPackage.isFirstRun,
+                                    isPending: currentPackage && currentPackage.isPending,
+                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
                                     currentPackage,
                                     remotePackage,
                                     updateShouldBeIgnored,
@@ -370,8 +370,8 @@ class CodePushService extends ServiceProvider {
                             updatePeriod(1, {
                                 description: "update_successfully",
                                 state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                isPending: currentPackage.isPending,
-                                isFirstRun: currentPackage.isFirstRun,
+                                isPending: currentPackage && currentPackage.isPending,
+                                isFirstRun: currentPackage && currentPackage.isFirstRun,
                                 currentPackage,
                                 remotePackage,
                                 updateShouldBeIgnored,
@@ -386,8 +386,8 @@ class CodePushService extends ServiceProvider {
                             updatePeriod(1, {
                                 description: "update_failed",
                                 state: codePush.SyncStatus.UNKNOWN_ERROR,
-                                isPending: currentPackage.isPending,
-                                isFirstRun: currentPackage.isFirstRun,
+                                isPending: currentPackage && currentPackage.isPending,
+                                isFirstRun: currentPackage && currentPackage.isFirstRun,
                                 currentPackage,
                                 remotePackage,
                                 updateShouldBeIgnored,
@@ -403,8 +403,8 @@ class CodePushService extends ServiceProvider {
                 updatePeriod(1, {
                     description: "up_to_date",
                     state: codePush.SyncStatus.UP_TO_DATE,
-                    isPending: currentPackage.isPending,
-                    isFirstRun: currentPackage.isFirstRun,
+                    isPending: currentPackage && currentPackage.isPending,
+                    isFirstRun: currentPackage && currentPackage.isFirstRun,
                     currentPackage,
                     remotePackage,
                     updateShouldBeIgnored,
