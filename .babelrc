@@ -1,0 +1,40 @@
+{
+  "plugins": [
+    "syntax-decorators",
+    "transform-decorators-legacy"
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        "react-native",
+        "react-native-stage-0/decorator-support"
+      ],
+      "plugins": [
+        "transform-async-generator-functions",
+        "transform-react-display-name",
+        //"transform-react-pure-class-to-function"
+      ]
+    },
+    "production": {
+      "presets": [
+        "react-native",
+        "react-native-stage-0/decorator-support"
+      ],
+      "plugins": [
+        "transform-async-generator-functions",
+        // "transform-remove-strict-mode",
+        "transform-remove-console",
+        //"transform-react-pure-class-to-function",
+        [
+          "transform-react-remove-prop-types",
+          {
+            "ignoreFilenames": [
+              "node_modules"
+            ],
+            "removeImport": true
+          }
+        ]
+      ]
+    }
+  }
+}

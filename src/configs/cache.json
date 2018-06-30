@@ -1,0 +1,29 @@
+{
+    "images": {
+        "driver": "File",
+        "namespace": "cache-image", // tên thư mục cache
+        "options": {
+            "keepExt": true, // giữ lại đuôi file
+            "hashFileName": true // encode tên file
+        }
+    },
+    "translations": {
+        "driver": "File",
+        "namespace": "cache-translations", // tên thư mục cache
+        "options": {
+            "keepExt": true, // giữ lại đuôi file
+            "hashFileName": true // encode tên file
+        }
+    },
+    "language": {
+        "driver": "LocalStore",
+        "namespace": "language",
+        "options": {},
+        "keepClear": true
+    },
+    "location-history": {
+        "driver": "LocalStore",
+        "namespace": "location-history", // tên mục cache
+        "options": {}
+    }
+}

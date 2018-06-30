@@ -16,5 +16,6 @@ export const response = (provider, props = {}) => {
     const response = container.make("response");
     response.setProvider(provider);
     response.setProps(props);
+    
     return response.send();
 };

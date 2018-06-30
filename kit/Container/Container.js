@@ -1,4 +1,5 @@
 import AliasLoader from '../Foundation/AliasLoader';
+import abtractUniqueID from '../Utilities/abtractUniqueID';
 
 class Container {
 
@@ -18,9 +19,9 @@ class Container {
 
     constructor() {
 
-        this._bindings = {};
-        this._resolved = {};
-        this._aliases = {};
+        this._bindings = new Map();
+        this._resolved = new Map();
+        this._aliases = new Map();
     }
 
     bind(abstract, concrete = null, shared = false) {
@@ -35,10 +36,12 @@ class Container {
             throw new Error("Concrete is not support");
         }
 
-        this._bindings[abstract] = {
+        let abstractID = abtractUniqueID(abstract);
+
+        this._bindings.set(abstractID, {
             concrete,
             shared
-        };
+        });
     }
 
     singleton(abstract, concrete) {
@@ -58,15 +61,17 @@ class Container {
 
     resolve(abstract, parameters = []) {
 
-        if (this._bindings.hasOwnProperty(abstract)) {
+        let abstractID = abtractUniqueID(abstract);
+
+        if (this._bindings.has(abstractID)) {
 
             const {
                 concrete,
                 shared
-            } = this._bindings[abstract];
+            } = this._bindings.get(abstractID);
 
-            let instance = this._resolved[abstract];
-            let isResolved = this._resolved.hasOwnProperty(abstract);
+            let instance = this._resolved.get(abstractID);
+            let isResolved = this._resolved.has(abstractID);
 
             if (
                 !shared
@@ -78,7 +83,7 @@ class Container {
 
             if ( shared ) {
 
-                this._resolved[abstract] = instance;
+                this._resolved.set(abstractID, instance);
             }
 
             return instance;
@@ -93,17 +98,22 @@ class Container {
 
             return new abstract(this);
         }
+
+        return undefined;
     }
 
     alias(abstract, alias) {
 
-        this._aliases[abstract] = alias;
+        let abstractID = abtractUniqueID(abstract);
+
+        this._aliases.set(abstractID, alias);
         AliasLoader.register(abstract, alias);
     }
 
     getAlias(abstract) {
 
-        return this._aliases[abstract];
+        let abstractID = abtractUniqueID(abstract);
+        return this._aliases.get(abstractID);
     }
 }
 

@@ -2,7 +2,8 @@ export default (container) => {
 
     container.singleton("events", () => {
 
-        return require("../Events/EventEmitter").default;
+        const EventEmitter = require("../Events/EventEmitter").default;
+        return new EventEmitter();
     });
 
     container.singleton("registry", () => {
@@ -28,7 +29,7 @@ export default (container) => {
         return new Response(container.make("splashScreen"));
     });
 
-    container.singleton("kernel", (con) => {
+    container.bind("kernel", (con) => {
         
         const Kernel = require("../Foundation/Kernel").default;
         return new Kernel(con);

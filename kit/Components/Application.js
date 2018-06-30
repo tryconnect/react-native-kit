@@ -61,6 +61,7 @@ class Application extends React.Component {
 
         this._event.emit("app.component.update");
         this._isMounted = false;
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState) {

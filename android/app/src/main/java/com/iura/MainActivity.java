@@ -12,7 +12,7 @@ import android.os.PowerManager;
 import android.view.WindowManager;
 import android.os.Bundle;
 
-// import com.reactnativecomponent.splashscreen.RCTSplashScreen;
+import com.reactnativecomponent.splashscreen.RCTSplashScreen;
 import android.widget.ImageView;
 
 import android.content.Intent;
@@ -44,7 +44,7 @@ public class MainActivity extends ReactActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         //RCTSplashScreen.openSplashScreen(this);   //open splashscreen
-	    // RCTSplashScreen.openSplashScreen(this, true, ImageView.ScaleType.FIT_XY);   //open splashscreen fullscreen
+	    RCTSplashScreen.openSplashScreen(this, true, ImageView.ScaleType.FIT_XY);   //open splashscreen fullscreen
 	    super.onCreate(savedInstanceState);
         
         instance = this;

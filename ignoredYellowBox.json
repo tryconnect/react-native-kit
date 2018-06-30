@@ -1,0 +1,17 @@
+[
+    "Remote debugger", 
+    "Debugger and device times",
+    "Module RCTImageLoader requires main queue setup",
+    "Module RNFetchBlob requires main queue setup",
+    "Module RCTOneSignalEventEmitter requires main queue setup",
+    "Module RNGoogleSignin requires main queue setup",
+    "Module RCTBackgroundGeolocation requires main queue setup",
+    "Failed prop type: Invalid props.style key `resizeMode`",
+    "Possible Unhandled Promise Rejection (id:",
+    "Required dispatch_sync to load",
+    "Sending `didReceiveNetworkResponse` with no listeners registered.",
+    "Sending `didReceiveNetworkIncrementalData` with no listeners registered.",
+    "Sending `didCompleteNetworkResponse` with no listeners registered.",
+    "Class RCTCxxModule was not exported",
+    "Warning: isMounted(...) is deprecated in plain JavaScript React classes",
+]

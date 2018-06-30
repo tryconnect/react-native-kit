@@ -1,0 +1,37 @@
+{
+
+	"updater": {
+		"init_app": "Loading",
+		"update_available": "Update available",
+		"optional_update_message": "An update is available. Would you like to install it?",
+		"mandatory_update_message": "An update is available that must be installed.",
+		"optional_install_buttonLabel": "Install",
+		"optional_ignore_button_label": "Ignore",
+		"mandatory_continue_button_label": "Continue",
+		"description_prefix": "Description: ",
+		"checking_for_update": "Checking for update",
+		"downloading_prefix": "Downloading",
+		"downloading": "downloading {{package}}",
+		"connecting": "connecting",
+		"awaiting_user_action": "Awaiting user action",
+		"installing_update": "Installing update",
+		"up_to_date": "Up to date",
+		"update_cancelled_by_user": "Update cancelled by user",
+		"update_installed": "Update installed and will be applied on restart",
+		"unknown_error": "An unknown error occurred",
+		"update_successfully": "Update successfully",
+		"update_failed": "Update failed",
+		"clear_cache": "Clear cache"
+	},
+	"alert": {
+		"exit_title": "Warning",
+		"exit_message": "Do you want to exit?",
+		"exit_ok": "OK",
+		"exit_cancel": "Cancel"
+	},
+	"locales": {
+		"language": "language",
+		"vi": "Tiếng việt",
+		"en": "English"
+	}
+}

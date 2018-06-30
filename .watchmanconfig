@@ -1,0 +1,16 @@
+{
+    "ignore_dirs": [
+        ".git",
+        ".svn",
+        ".hg",
+        "build",
+        "design"
+    ],
+    "ignore_vcs": [
+        ".git",
+        ".svn",
+        ".hg",
+        "build",
+        "design"
+    ]
+}

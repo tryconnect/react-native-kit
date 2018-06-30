@@ -1,0 +1,106 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Picker, View } from 'react-native';
+import { colors, scale } from '~/configs/styles';
+import SelectItem from '~/components/SelectItem';
+
+class Select extends React.Component {
+
+    static displayName = "@Select";
+
+    static propTypes = {
+        error: PropTypes.bool,
+        success: PropTypes.bool,
+        warning: PropTypes.bool,
+        children: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.array
+        ]),
+        onValueChange: PropTypes.func,
+        selectedValue: PropTypes.string,
+        enabled: PropTypes.bool,
+    };
+
+    static defaultProps = {
+        error: false,
+        success: false,
+        warning: false,
+        children: null,
+        enabled: true
+    };
+
+    constructor(props) {
+        super(props);
+        this.state =
+            {
+                selected: props.selectedValue ? props.selectedValue : ''
+            };
+    }
+
+    render() {
+
+        const {
+            error,
+            success,
+            warning,
+            children,
+            enabled,
+
+        } = this.props;
+
+
+        return null;
+
+        return (
+            <View style=
+                {[
+                    _styles.container,
+                    !!error && _styles.error,
+                    !!success && _styles.success,
+                    !!warning && _styles.warning,
+                ]}
+            >
+                <Picker
+                    enabled={enabled}
+                    selectedValue={this.state.selected}
+                    onValueChange={(value) => this.setState({ selected: value })}
+                >
+                    {
+                        children.map(
+                            (r, i) => <SelectItem
+                                label={r.label}
+                                value={r.value}
+                                key={i}
+                            ></SelectItem>
+                        )
+                    }
+                </Picker>
+            </View>
+        );
+
+    }
+
+}
+
+const _styles = {
+    container: {
+        borderWidth: 1 * scale,
+        borderColor: colors.pannelBorderColor,
+        borderRadius: 5 * scale,
+        height: 40 * scale,
+        backgroundColor: colors.inputBackgroundColor,
+        margin: 10 * scale,
+        justifyContent: 'center',
+    },
+    error: {
+        borderColor: colors.inputErrorBorderColor,
+    },
+    success: {
+        borderColor: colors.inputSuccessBorderColor,
+    },
+    warning: {
+        borderColor: colors.inputWarningBorderColor,
+    }
+};
+
+export default Select;
