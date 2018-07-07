@@ -2,9 +2,10 @@ import ServiceProvider from '../Support/ServiceProvider';
 
 class TranslatorServiceProvider extends ServiceProvider {
 
-    register() {
+    constructor(app) {
+        super(app);
 
-        const configs = this.app.configs('translator');
+        const configs = app.configs('translator');
         if (configs) {
 
             const translator = require("../Foundation/I18n").default;
@@ -28,15 +29,15 @@ class TranslatorServiceProvider extends ServiceProvider {
             translator.locale = locale;
             translator.defaultLocale = defaultLocale;
 
-            if(typeof fallbacks === "function") {
-                
+            if (typeof fallbacks === "function") {
+
                 translator.fallbacks = true;
                 translator.no = fallbacks;
             }
             translator.no = no || translator.no;
 
-            this.app.bind("translator", () => translator);
-            this.app.alias("translate", (scope, options = {}) => {
+            app.bind("translator", () => translator);
+            app.alias("translate", (scope, options = {}) => {
 
                 return translator.translate(scope, options);
             });

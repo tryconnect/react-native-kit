@@ -1,30 +1,38 @@
 import scale from './scale';
 
+// kích thước các layout: margin, spacing,...
+export const layout = {
+    margin: scale(10),
+    // khoản cách
+    spacing: scale(5),
+
+    // size Icon Service Item
+    iconServiceItem: scale(40),
+    // size WishButton,
+    wishButtonSize: scale(20)
+};
+
+// kích thước các border
+export const border = {
+
+    // borer Các row
+    rowItemBorderBottom: scale(3)
+};
+
+// các kích thước input
+export const input = {
+    height: scale(30),
+
+    // radio
+    radioSize: scale(20),
+    radioBorder: scale(2),
+
+    // border check box
+    borderWidth: scale(2)
+};
+
 export default {
-    margin              : 10 * scale, // lề ngoài
-    padding             : 10 * scale, // lề trong
-    spacing             : 5 * scale, // khoảng cách
-    large               : 15 * scale,
-    huge                : 20 * scale,
-    rowItemHeight       : 36 * scale,
-    // border
-    borderWidth         : 1 * scale,
-    // button
-    buttonHeight        : 30 * scale,  // chiều cao của button
-    buttonBorderRadius  : 30 * scale, // border radius cho button
-    buttonLargeHeight   : 40 * scale, // chiều cao của button to
-
-    // panel
-    panelBorderWidth    : 1 * scale, // border của panel
-    panelHeaderMinHeight: 30 * scale, // kích thước tối thiểu của header
-
-    // input
-    inputBorderWidth    : 1 * scale, // border input
-
-    // header
-    headerHeight        : 40 * scale, // chiều cao của header
-    footerHeight: 50 * scale, // chiều cao của footer
-
-    // list view
-    separatorHeight     : 1 * scale, // kích thước line cách dòng
+    layout,
+    border,
+    input
 };

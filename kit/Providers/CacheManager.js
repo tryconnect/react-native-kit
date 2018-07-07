@@ -2,26 +2,23 @@ import ServiceProvider from '../Support/ServiceProvider';
 
 class CacheManagerService extends ServiceProvider {
 
-    register() {
+    constructor(app) {
+        super(app);
+        
+        if (app.configs("cacheManager")) {
 
-        if (this.app.configs("cacheManager")) {
+            app.singleton("cacheManager", () => {
 
-            this.app.singleton("cacheManager", () => {
-    
                 const CacheManager = require("../Cache/CacheManager").default;
-                const drivers = this.app.configs("cacheManager.drivers") || {
+                const drivers = app.configs("cacheManager.drivers") || {
                     "Memory": require("../Cache/Adapter/Memory").default,
                     "LocalStore": require("../Cache/Adapter/LocalStore").default
                 };
-                const caches = this.app.configs("cacheManager.caches") || {};
-    
+                const caches = app.configs("cacheManager.caches") || {};
+
                 return new CacheManager(caches, drivers);
             });
         }
-    }
-
-    boot() {
-
     }
 }
 

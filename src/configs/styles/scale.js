@@ -117,4 +117,17 @@ scale = Platform.select({
     android: getScale(),
 });
 
-export default 1;
+export default (target) => {
+
+    if( typeof target === "object" ) {
+        
+        for (let key in target) {
+            if (target.hasOwnProperty(key)) {
+                target[key] = target[key] * scale;
+            }
+        }
+        return target;
+    }
+
+    return target * scale;
+};

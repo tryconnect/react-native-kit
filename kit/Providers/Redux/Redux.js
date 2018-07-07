@@ -17,6 +17,16 @@ class Redux {
         this.enhancer = enhancer || [];
         this.initState = initState;
         this.reducers = reducers || {};
+
+        this._compileReducer = (key, reducer, configs = {}) => {
+
+            reducer.$$typeOf = key;
+            reducer.$$type = "reducer";
+            reducer.$$key = key;
+            reducer.typeOf = () => key;
+
+            return reducer;
+        };
     }
 
     createStore(...args) {
@@ -78,17 +88,22 @@ class Redux {
 
     registerReducer(key, reducer, configs = {}) {
 
-        reducer.$$typeOf = key;
-        reducer.$$type = "reducer";
-        reducer.$$key = key;
-        reducer.typeOf = () => key;
-
-        this.reducers[key] = reducer;
+        this.reducers[key] = this._compileReducer(key, reducer, configs);
         if(this.store) {
 
             this.store.replaceReducer(this.combineReducers(this.reducers));
         }
         return reducer;
+    }
+
+    addCompileReducer(compiler) {
+
+        const compile = this._compileReducer;
+        this._compileReducer = (key, reducer, configs = {}) => {
+
+            reducer = compile(key, reducer, configs);
+            return compiler(key, reducer, configs);
+        };
     }
 
     addMiddleware(middleware) {

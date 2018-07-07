@@ -1,0 +1,5 @@
+{
+    "key": "store",
+    "blacklist": [],
+    "storage": "redux-persist"
+}

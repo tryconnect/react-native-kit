@@ -1,6 +1,8 @@
 import { AsyncStorage } from 'react-native';
 import ServiceProvider from '../Support/ServiceProvider';
+import throttledPromise from '../Utilities/throttledPromise';
 
+const timeoutCache = 20000;
 class ExceptionHandleServiceProvider extends ServiceProvider {
 
     constructor(app) {
@@ -54,24 +56,49 @@ class ExceptionHandleServiceProvider extends ServiceProvider {
         });
 
         app.make("events").addListener("app.js.exception", async ({ error, isFatal }) => {
+            if(__DEV__) {
+
+                alert("Application Error!");
+                console.log(error);
+                global.close && global.close();
+                return;
+            }
             
-            let keys = await AsyncStorage.getAllKeys();
+            let keys = await throttledPromise(
+                AsyncStorage.getAllKeys, 
+                timeoutCache, 
+                "Check crash restart failed"
+            )();
+
             keys = keys || [];
             let counter = 0;
 
             if (keys.includes(storedKey)) {
 
-                counter = await AsyncStorage.getItem(storedKey);
+                counter = await throttledPromise(
+                    AsyncStorage.getItem,
+                    timeoutCache,
+                    "Check crash restart failed"
+                )(storedKey);
             }
 
             counter = counter * 1;
             counter = counter + 1;
 
-            await AsyncStorage.setItem(storedKey, `${counter}`);
+            await throttledPromise(
+                AsyncStorage.setItem,
+                timeoutCache,
+                "Check crash restart failed"
+            )(storedKey, `${counter}`);
 
             if (counter > 3) {
 
                 alert("Application Error!");
+                await throttledPromise(
+                    AsyncStorage.multiRemove,
+                    timeoutCache,
+                    "Check crash restart failed"
+                )(keys);
                 global.close && global.close();
                 return;
             }
@@ -91,7 +118,11 @@ class ExceptionHandleServiceProvider extends ServiceProvider {
 
         app.booted(async () => {
 
-            return await AsyncStorage.setItem(storedKey, `0`);
+            return await throttledPromise(
+                AsyncStorage.setItem,
+                timeoutCache,
+                "Check crash restart failed"
+            )(storedKey, `0`);
         });
     }
 }

@@ -15,15 +15,22 @@
             "hashFileName": true // encode tên file
         }
     },
-    "language": {
+    "redux-persist": {
         "driver": "LocalStore",
-        "namespace": "language",
+        "namespace": "redux-persist",
         "options": {},
         "keepClear": true
     },
-    "location-history": {
+    "auth": {
         "driver": "LocalStore",
-        "namespace": "location-history", // tên mục cache
-        "options": {}
+        "namespace": "auth",
+        "options": {},
+        "keepClear": true
+    },
+    "stringee": {
+        "driver": "LocalStore",
+        "namespace": "stringee",
+        "options": {},
+        "keepClear": true
     }
 }

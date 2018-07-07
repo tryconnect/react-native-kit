@@ -1,3 +1,25 @@
 {
-	
+	"code_push": {
+        "optional_update_title": "Phiên bản mới {{version}}",
+        "mandatory_update_message": "Vui lòng cập nhật phiên bản mới",
+        "optional_update_message": "Nhấn cài đặt để trải nghiệm",
+        "optional_ignore_button_label": "Bỏ qua",
+        "optional_install_button_label": "Cài đặt",
+        "first_run_title_installed": "Cập nhật thành công",
+        "first_run_message_installed": "Mở lại app để áp dụng",
+        "first_run_title_error": "Cập nhật không thành công",
+        "first_run_message_error": "Vui lòng thử lại trên CH-PLAY hoặc AppStore"
+    },
+    "caller": {
+        "disconnected": "Mất kết nối",
+        "reconnecting": "Đang kết nối lại",
+        "connecting": "Đang kết nối",
+        "ringing": "Đang đổ chuông",
+        "busy": "Máy bận",
+        "ended": "Đã kết thúc",
+        "calling": "Đang gọi",
+        "answered_another_device": "Đã trả lời trên thiết bị khác",
+        "declined_another_device": "Đã từ chối trên thiết bị khác",
+        "ended_another_device": "Đã từ chối trên thiết bị khác"
+    }
 }

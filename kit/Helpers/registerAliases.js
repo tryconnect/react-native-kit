@@ -5,6 +5,10 @@ export default (container, aliases = {}) => {
         if (aliases.hasOwnProperty(key)) {
 
             let alias = aliases[key];
+            if (typeof alias === "string") {
+
+                alias = container.make(alias) || alias;
+            }
             container.alias(key, alias);
         }
     }

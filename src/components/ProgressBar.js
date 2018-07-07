@@ -23,7 +23,8 @@ class ProgressBar extends React.Component {
 		onLayout: PropTypes.func,
 		progress: PropTypes.number,
 		unfilledColor: PropTypes.string,
-		width: PropTypes.number
+		width: PropTypes.number,
+		onRef: PropTypes.func
 	};
 
 	static defaultProps = {
@@ -141,6 +142,7 @@ class ProgressBar extends React.Component {
 			style,
 			unfilledColor,
 			width,
+			onRef,
 			...restProps
 		} = this.props;
 
@@ -180,6 +182,7 @@ class ProgressBar extends React.Component {
 				{...restProps}
 				style    = {[containerStyle, style]} 
 				onLayout = {this._handleLayout} 
+				ref      = {onRef}
 			>
 				<Animated.View style={progressStyle} />
 				{children}

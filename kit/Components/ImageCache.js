@@ -11,27 +11,30 @@ class ImageCache extends React.Component {
 
     static displayName = "@ImageCache";
 
-    static propTypes = {
-        // ...Image.propTypes,
-        // animating: ActivityIndicator.propTypes.animating,
-        // loadingColor: ActivityIndicator.propTypes.color,
-        // loadingSize: ActivityIndicator.propTypes.size,
-        // hidesWhenStopped: ActivityIndicator.propTypes.hidesWhenStopped,
+    // static propTypes = {
+    //     ...Image.propTypes,
+    //     animating: ActivityIndicator.propTypes.animating,
+    //     loadingColor: ActivityIndicator.propTypes.color,
+    //     loadingSize: ActivityIndicator.propTypes.size,
+    //     hidesWhenStopped: ActivityIndicator.propTypes.hidesWhenStopped,
 
-        // source: Image.propTypes.source,
+    //     source: Image.propTypes.source,
 
-        // onProgress: PropTypes.func,
-        // downloader: PropTypes.object.isRequired,
+    //     onProgress: PropTypes.func,
+    //     downloader: PropTypes.object.isRequired,
 
-        // fadeDuration: PropTypes.number
-    };
+    //     fadeDuration: PropTypes.number,
+    //     disableLoading: PropTypes.bool,
+    //     onRef: PropTypes.func
+    // };
 
     static defaultProps = {
         source: null,
         errorSource: null,
         loadingIndicatorSource: null,
         defaultSource: null,
-        fadeDuration: 200
+        fadeDuration: 200,
+        disableLoading: false
     };
 
     constructor(props) {
@@ -40,28 +43,41 @@ class ImageCache extends React.Component {
         this.state = {
             source: (
                 props.source
-                || props.defaultSource
                 || props.loadingIndicatorSource
+                || props.defaultSource
                 || props.errorSource
             ),
             loading: false
         };
 
         this._requestDownload = null;
+        this._maxError = 4;
     }
 
     static getDerivedStateFromProps(props, prevState) {
 
-        if (props.source !== prevState.source) {
+        let currentUri = getUrl(prevState.source);
+        let sourceUri = getUrl(props.source);
+        let defaultUri = getUrl(props.defaultSource);
+        let errorUri = getUrl(props.errorSource);
+        let loadingUri = getUrl(props.loadingIndicatorSource);
+
+        if( 
+            currentUri !== sourceUri
+            && currentUri !== defaultUri
+            && currentUri !== errorUri
+            && currentUri !== loadingUri
+        ) {
 
             return {
                 source: (
                     props.source
-                    || props.defaultSource
                     || props.loadingIndicatorSource
+                    || props.defaultSource
                     || props.errorSource
                 ),
-                loading: false
+                loading: false,
+                errorCounter: 0
             };
         }
         return null;
@@ -88,6 +104,8 @@ class ImageCache extends React.Component {
             loadingSize,
             loadingColor,
             hidesWhenStopped,
+            disableLoading,
+            onRef,
             ...otherProps
         } = this.props;
 
@@ -127,11 +145,12 @@ class ImageCache extends React.Component {
                     onError                = {this._onError}
                     onLoadStart            = {this._onLoadStart}
                     onLoadEnd              = {this._onLoadEnd}
+                    ref                    = {onRef}
                 >
                     {children}
                 </Component>
                 {
-                    this.state.loading &&
+                    this.state.loading && !disableLoading &&
                         <ActivityIndicator
                             style            = {_styles.loading}
                             animating        = {animating}
@@ -148,8 +167,12 @@ class ImageCache extends React.Component {
 
         if (this.props.downloader) {
             
-            let uri = getUrl(this.props.source) || getUrl(this.props.defaultSource);
-            this.download(uri);
+            let uri = getUrl(this.props.source) 
+                || getUrl(this.props.defaultSource)
+                || getUrl(this.props.errorSource)
+                || getUrl(this.props.loadingIndicatorSource)
+            ;
+            uri && this.download(uri);
         }
     }
 
@@ -160,9 +183,15 @@ class ImageCache extends React.Component {
             if (
                 this.props.source !== prevProps.source
                 || this.props.defaultSource !== prevProps.defaultSource
+                || this.props.errorSource !== prevProps.errorSource
+                || this.props.loadingIndicatorSource !== prevProps.loadingIndicatorSource
             ) {
     
-                let uri = getUrl(this.props.source) || getUrl(this.props.defaultSource);
+                let uri = getUrl(this.props.source) 
+                    || getUrl(this.props.defaultSource)
+                    || getUrl(this.props.errorSource)
+                    || getUrl(this.props.loadingIndicatorSource)
+                ;
                 
                 if (uri && uri != getUrl(this.state.source)) {
     
@@ -202,6 +231,7 @@ class ImageCache extends React.Component {
             source: (
                 this.props.loadingIndicatorSource
                 || this.props.defaultSource
+                || this.props.errorSource
             )
         });
 
@@ -218,54 +248,103 @@ class ImageCache extends React.Component {
 
             this.setState({
                 loading: false,
-                source: (
-                    this.props.source
-                    || this.props.defaultSource
-                    || this.props.errorSource
-                )
+                source: {
+                    uri: url
+                }
             });
 
-            // this._onError({
-            //     nativeEvent: error
-            // });
+            this._onError({
+                nativeEvent: error
+            });
         }
     };
 
     _onError = (e) => {
 
-        let errorSource;
-        if (
-            this.state.source === this.props.source
-            || (
-                this.state.source !== this.props.defaultSource
-                && this.state.source !== this.props.errorSource
-                && this.state.source !== this.props.loadingIndicatorSource
-            )
-        ) {
+        let errorSource = null;
+        
+        switch (this.state.source) {
 
-            errorSource = this.props.defaultSource || this.props.errorSource;
-            this.setState({
-                source: errorSource,
-                loading: errorSource != null
-            });
-        } else if (
-            this.props.defaultSource 
-            && this.state.source === this.props.defaultSource
-        ) {
+            case this.props.loadingIndicatorSource:
+                
+                errorSource = this.props.source;
+                break;
 
-            errorSource = this.props.errorSource;
-            this.setState({
-                source: errorSource,
-                loading: errorSource != null
-            });
-        } else {
+            case this.props.source:
+                
+                errorSource = this.props.defaultSource;
+                break;
 
-            errorSource = this.props.errorSource || this.props.loadingIndicatorSource;
-            this.setState({
-                source: errorSource,
-                loading: errorSource != null
-            });
+            case this.props.defaultSource:
+                
+                errorSource = this.props.errorSource;
+                break;
+
+            case this.props.errorSource:
+                
+                errorSource = null;
+                break;
+
+            default:
+
+                let currentUri = getUrl(this.state.source);
+                let sourceUri = getUrl(this.props.source);
+                let defaultUri = getUrl(this.props.defaultSource);
+                let errorUri = getUrl(this.props.errorSource);
+                let loadingUri = getUrl(this.props.loadingIndicatorSource);
+
+                let url = null;
+                let source = null;
+
+                switch (currentUri) {
+
+                    case sourceUri:
+                        
+                        url = defaultUri || errorUri || loadingUri;
+                        source = this.props.defaultSource || this.props.errorSource || this.props.loadingIndicatorSource;
+                        break;
+
+                    case defaultUri:
+                        
+                        url = errorUri || loadingUri;
+                        source = this.props.errorSource || this.props.loadingIndicatorSource;
+                        break;
+
+                    case errorUri:
+
+                        url = loadingUri;
+                        source = this.props.loadingIndicatorSource;
+                        break;
+                        
+                    case loadingUri:
+                        
+                        url = null;
+                        source = null;
+                        break;
+                }
+
+                if (url) {
+
+                    return this.download(url);
+                }
+                errorSource = source;
+                break;
         }
+
+        if( this.state.errorCounter > this._maxError ) {
+
+            this.setState({
+                source: errorSource,
+                loading: false
+            });
+            return;
+        }
+
+        this.setState({
+            source: errorSource,
+            loading: false,
+            errorCounter: this.state.errorCounter + 1
+        });
 
         this.props.onError && this.props.onError(e);
     };
@@ -292,9 +371,10 @@ class ImageCache extends React.Component {
     _download = async (url, configs = {}) => {
 
         const downloader = this.props.downloader;
+        
         if (!downloader) {
-
-            throw new Error("downloader has not been initialized")
+            
+            throw new Error("downloader has not been initialized");
         }
 
         configs = {
@@ -334,6 +414,7 @@ class ImageCache extends React.Component {
 
         this._requestDownload = downloader.download(url, configs);
         const base64 = await this._requestDownload;
+        this._requestDownload = undefined;
 
         if (cache && cache.isFile()) {
 
@@ -367,7 +448,7 @@ const getUrl = (source) => {
 
         return source;
     }
-    if (typeof source === "object" && REGX_URL.test(source.uri)) {
+    if (source && typeof source === "object" && REGX_URL.test(source.uri)) {
 
         return source.uri;
     }

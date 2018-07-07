@@ -1,8 +1,8 @@
 import scale from './scale';
 
-export default {
-    top   : 10 * scale,
-    right : 20 * scale,
-    bottom: 10 * scale,
-    left  : 20 * scale
-};
+export default scale({
+    top   : 10,
+    right : 20,
+    bottom: 10,
+    left  : 20
+});

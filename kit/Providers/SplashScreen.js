@@ -20,16 +20,24 @@ class SplashScreenServiceProvider extends ServiceProvider {
                 SplashScreen.close(configs);
             };
 
-            app.starting(() => {
+            let event = app.starting(() => {
     
+                event && event.remove && event.remove();
                 if (app.isBooted()) {
     
                     return close();
                 }
-                app.booted(() => {
+                // app.booted(() => {
+
+                //     close();
+                // });
+
+                app.booting(() => {
 
                     close();
                 });
+
+                // close();
             });
         }
     }

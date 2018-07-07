@@ -243,35 +243,34 @@ class Step {
         this._reject = null;
         this._run = start;
         this._isFinished = false;
-
-        if(start.then) {
-            (async () => {
-                this.data = await start || data;
-                this.updatePeriod(1, this.data);
-            })();
-        }
     }
 
     await(progressCallback) {
 
         this.progressCallback = progressCallback;
+
+        if (this.period < 1) {
+
+            this.updatePeriod(this.period, this.data);
+        }
         return new Promise(async (resolve, reject) => {
             this._resolve = resolve;
             this._reject = reject;
 
             let task = this._run;
-            if (typeof task === "function") {
-
-                task = task(this.updatePeriod);
-            }
-
-            if(task.then) {
+            if (task && task.then) {
 
                 try {
-                    
+
                     this.data = await task || this.data;
-                } catch (error) {}
-                this.updatePeriod(1, this.data);
+                } catch (error) { }
+
+                return this.updatePeriod(1, this.data);
+            }
+            
+            if (typeof task === "function") {
+
+                task = task(this.updatePeriod.bind(this));
             }
         });
     }

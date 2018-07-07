@@ -1,0 +1,34 @@
+{
+    "alert": {
+        "title": "Thông báo",
+        "error": "Lỗi hệ thống",
+        "success": "Thành công",
+        "exit_ok": "OK",
+        "exit_cancel": "Cancel",
+        "exit_title": "Thoát ứng dụng",
+        "exit_message": "Bạn có muốn thoát?"
+    },
+    "comfirm": {
+        "apply": "Áp dụng",
+        "cancel": "Hủy"
+    },
+    "image_picker": {
+        "title": "Chọn ảnh đại diện",
+        "cancel": "Hủy",
+        "take": "Chụp ảnh",
+        "library": "Thư viện",
+        "deny": {
+            "title": "Không có quyền truy cập",
+            "text": "Bạn vui lòng cấp quyền để có thể truy cập máy ảnh và thư viện",
+            "retry": "Thử lại"
+        },
+        "error": {
+            "title": "Lỗi",
+            "text": "Chọn hình ảnh không thành công"
+        }
+    },
+    "list_message": {
+        "empty_message": "Không có dữ liệu",
+        "pull_to_refresh": "Kéo xuống để tải lại"
+    }
+}

@@ -2,10 +2,13 @@ export default (target = () => {}, options = {}) => {
 
     // valid options
     options = options || {};
-    options.cancelable = options.cancelable || { isCanceled: true };
+    options.cancelable = options.cancelable || { 
+        isCanceled: true,
+        message: "Canceled"
+    };
     options.onCanel = options.onCanel || (() => {});
     options.onResult = options.onResult || (() => { });
-    options.pipe = options.pipe || (() => { });
+    options.pipe = options.pipe || (() => {});
     
     // cờ cancel
     let hasCanceled = false;
@@ -15,12 +18,12 @@ export default (target = () => {}, options = {}) => {
     let cancel = () => {
 
         hasCanceled = true;
+        
+        // gọi sự kiện cancel
+        options.onCanel && options.onCanel(options.cancelable);
 
         // gọi sự kiện hoàn tất
         options.pipe && options.pipe();
-
-        // gọi sự kiện cancel
-        options.onCanel && options.onCanel(options.cancelable);
     };
     
     // nếu đối tượng là function
@@ -28,9 +31,6 @@ export default (target = () => {}, options = {}) => {
 
         // khởi tạo function task
         result = (...args) => {
-
-            // gọi sự kiện hoàn tất
-            options.pipe && options.pipe();
 
             // nếu task đã cancel 
             if (hasCanceled) {
@@ -42,6 +42,10 @@ export default (target = () => {}, options = {}) => {
             // lấy kết quả và gọi sự kiện result
             let res = target(...args);
             options.onResult && options.onResult(res);
+
+            // gọi sự kiện hoàn tất
+            options.pipe && options.pipe();
+
             return res;
         };
         
@@ -60,11 +64,12 @@ export default (target = () => {}, options = {}) => {
                    return reject(options.cancelable);
                }
 
-               // gọi sự kiện hoàn tất
-               options.pipe && options.pipe();
-
                // nếu task chưa cancel gọi sự kiện result
                options.onResult && options.onResult(res);
+
+               // gọi sự kiện hoàn tất
+               options.pipe && options.pipe();
+               
                return resolve(res);
            } catch (error) { // nếu task lỗi
                

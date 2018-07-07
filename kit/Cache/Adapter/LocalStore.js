@@ -1,8 +1,12 @@
 import md5 from 'crypto-js/md5';
 import { AsyncStorage } from 'react-native';
 import mixins from '../mixins';
+import throttledPromise from '../../Utilities/throttledPromise';
 
-const DEFAULT_CONFIGS = {};
+const DEFAULT_CONFIGS = {
+    timeout: 30000,
+    timeoutMessage: "Cache timeout"
+};
 
 class LocalStoreCache {
 
@@ -43,7 +47,11 @@ class LocalStoreCache {
 
             try {
 
-                let allKeys = await AsyncStorage.getAllKeys();
+                let allKeys = await throttledPromise(
+                    AsyncStorage.getAllKeys, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )();
                 allKeys = allKeys || [];
 
                 let path = this.getPath(key);
@@ -71,7 +79,11 @@ class LocalStoreCache {
                 let path = this.getPath(key);
                 key = `${path}`.replace(`path://`, "");
 
-                let value = await AsyncStorage.getItem(key);
+                let value = await throttledPromise(
+                    AsyncStorage.getItem,
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(key);
                 value = value ? JSON.parse(value) : value;
 
                 resolve(value);
@@ -88,7 +100,11 @@ class LocalStoreCache {
 
             try {
 
-                let allKeys = await AsyncStorage.getAllKeys();
+                let allKeys = await throttledPromise(
+                    AsyncStorage.getAllKeys,
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )();
                 allKeys = allKeys || [];
 
                 allKeys = allKeys.filter((key) => {
@@ -144,7 +160,11 @@ class LocalStoreCache {
                 key = `${path}`.replace(`path://`, "");
 
                 data = JSON.stringify(data);
-                await AsyncStorage.setItem(key, data);
+                await throttledPromise(
+                    AsyncStorage.setItem,
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(key, data);
 
                 resolve(path);
             } catch (error) {
@@ -163,7 +183,11 @@ class LocalStoreCache {
                 let path = this.getPath(key);
                 key = `${path}`.replace(`path://`, "");
 
-                await AsyncStorage.removeItem(key);
+                await throttledPromise(
+                    AsyncStorage.removeItem,
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(key);
 
                 resolve(path);
             } catch (error) {
@@ -187,7 +211,11 @@ class LocalStoreCache {
 
                         return `${path}`.replace(`path://`, "");
                     });
-                    await AsyncStorage.multiRemove(allKeys);
+                    await throttledPromise(
+                        AsyncStorage.multiRemove,
+                        this.configs.timeout,
+                        this.configs.timeoutMessage
+                    )(allKeys);
                 }
 
                 resolve(allPaths);
@@ -195,6 +223,52 @@ class LocalStoreCache {
                 reject(error);
             }
         });
+    }
+
+    async getItem(key, callback) {
+
+        try {
+
+            let hasCache = await this.has(key);
+            if (!hasCache) {
+
+                callback && callback(null, undefined);
+                return undefined;
+            }
+            let result = await this.get(hasCache);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async setItem(key, value, callback) {
+
+        try {
+
+            let result = await this.put(key, value);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            console.log(error);
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async removeItem(key, callback) {
+
+        try {
+
+            let result = await this.delete(key);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
     }
 }
 

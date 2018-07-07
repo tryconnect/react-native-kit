@@ -2,18 +2,19 @@ import ServiceProvider from '../../Support/ServiceProvider';
 
 class NavigationServiceProvider extends ServiceProvider {
 
-    register() {
-        
+    constructor(application) {
+        super(application);
+
         // hàm prefix routeName và option component
         const routeConfiguration = require("./routeConfiguration").default;
         const StackViewStyleInterpolator = require("./StackViewStyleInterpolator").default;
-        
+
         // middleware compile route
-        var enhancer = (configuration) => configuration;
+        var enhancer = (routeName, configuration) => configuration;
 
         const navigation = {
             routeConfiguration: (name, screen, init = {}) => {
-                
+
                 // prefix
                 let configuration = routeConfiguration(name, screen);
 
@@ -24,22 +25,19 @@ class NavigationServiceProvider extends ServiceProvider {
 
                     let initialRouteName = `/${name}/${initialRouteName}`.replace(/[\/]+/g, "/");
                 }
-                
+
                 let initialRouteParams = init.initialRouteParams || {};
 
                 // callback middleware compile
                 for (let key in configuration) {
                     if (configuration.hasOwnProperty(key)) {
-                        
+
                         // call middleware
                         let {
                             screen,
                             path,
                             navigationOptions
-                        } = enhancer({
-                            routeName: key,
-                            configuration: configuration[key]
-                        }).configuration || {};
+                        } = enhancer(key, configuration[key]) || {};
 
                         // config route
                         configuration[key] = {
@@ -67,31 +65,22 @@ class NavigationServiceProvider extends ServiceProvider {
                     throw new Error("Navigation routeConfiguration middleware is not support");
                 }
 
-                const compose = require("../../Utilities/compose").default;
-                const enhancerAdvance = enhancer;
+                const compile = enhancer;
+                enhancer = (routeName, configuration) => {
 
-                enhancer = compose(
-                    ({routeName, configuration}) => {
-                        
-                        configuration = middleware(routeName, configuration) || configuration;
-                        return {routeName, configuration};
-                    },
-                    (configuration) => enhancerAdvance(configuration)
-                );
+                    return middleware(routeName, compile(routeName, configuration));
+                };
+
                 return enhancer;
             }
         };
-        
-        this.app.bind("navigation", () => navigation);
 
-        this.app.alias("route", (name, screen, init) => {
+        application.bind("navigation", () => navigation);
+
+        application.alias("route", (name, screen, init) => {
 
             return app("navigation").routeConfiguration(name, screen, init);
         });
-    }
-
-    boot() {
-
     }
 }
 

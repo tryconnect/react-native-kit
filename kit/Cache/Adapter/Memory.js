@@ -196,6 +196,51 @@ class MemoryCache {
             }
         });
     }
+
+    async getItem(key, callback) {
+
+        try {
+            
+            let hasCache = await this.has(key);
+            if (!hasCache) {
+
+                callback && callback(null, undefined);
+                return undefined;
+            }
+            let result = await this.get(hasCache);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async setItem(key, value, callback) {
+
+        try {
+
+            let result = await this.put(key, value);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async removeItem(key, callback) {
+
+        try {
+
+            let result = await this.delete(key);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
 }
 
 MemoryCache.name = "Array";

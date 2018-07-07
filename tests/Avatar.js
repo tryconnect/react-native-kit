@@ -1,6 +1,6 @@
-"use strict";
 import React from 'react';
-import Avatar from '../src/components/Avatar';
+import { View } from 'react-native';
+import Avatar from '~/components/Avatar';
 
 class TestAvatar extends React.Component {
     static displayName = "@TestAvatar";
@@ -8,10 +8,17 @@ class TestAvatar extends React.Component {
     render() {
 
         return (
-            <Avatar
-                source='https://reactnativecode.com/wp-content/uploads/2018/01/Error_Img.png'
-            >
-            </Avatar>
+            <View style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
+                <Avatar
+                    // source='https://reactnativecode.com/wp-content/uploads/2018/01/Error_Img.png'
+                    onlineStatus={true}
+                >
+                </Avatar>
+            </View>
         );
     }
 

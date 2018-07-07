@@ -3,7 +3,7 @@
  * @author Croco
  * @since 28-2-2018
  */
-export default (handler, period = 0) => {
+export default (handler, period = 0, message = "Promise timeout") => {
 
     return (...args) => {
 
@@ -19,11 +19,11 @@ export default (handler, period = 0) => {
 
                 let timeID = setTimeout(() => {
     
-                    reject(new Error("Promise timeout"))
+                    reject(new Error(message))
                 }, period);
     
                 waiting.finally( () => {
-    
+                    
                     if(timeID) {
     
                         clearTimeout(timeID);

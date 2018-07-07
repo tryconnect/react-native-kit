@@ -8,6 +8,8 @@ class Response {
         this.provider = provider;
         this.props = props || {};
         this._compiler = compiler;
+        this._element = null;
+        this._locked = false;
     }
 
     setProvider(provider) {
@@ -16,11 +18,26 @@ class Response {
         return this;
     };
 
+    getElement() {
+
+        return this._element;
+    }
+
+    getProvider() {
+
+        return this.provider;
+    }
+
     setProps( props = {} ) {
 
         this.props = props || {};
         return this;
     };
+
+    getProps() {
+
+        return this.props;
+    }
 
     addProp(name, value) {
 
@@ -40,12 +57,22 @@ class Response {
         return this;
     };
 
+    lock() {
+
+        this._locked = true;
+    }
+
+    unlock() {
+
+        this._locked = false;
+    }
+
     send() {
 
-        let element = this.compile(this.provider, this.props);
+        this._element = this.compile(this.provider, this.props);
 
-        app("events").emit("app.response", { element });
-        return element;
+        !this._locked && app("events").emit("app.response", { element: this._element });
+        return this._element;
     };
 
     compile(provider, props = {}) {
@@ -67,7 +94,7 @@ class Response {
     }
 }
 
-const compiler = (Component, props = {}) => {
+export const compiler = (Component, props = {}) => {
 
     const {
         children,

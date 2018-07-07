@@ -8,7 +8,11 @@ const {
         "screen": require("./scenes/Home.scene").default,
         "redux": {
             "reducerOptions": {
-                "generateReducer": require("./reducers/test.reducer").default
+                "generateReducer": require("./reducers/test.reducer").default,
+                "options": {
+                    "persist": true,
+                    "generateLogic": require("./logics/test.logic").default
+                }
             },
             "containerOptions": {
                 "generateActions": require("./actions/test.action").default
@@ -16,6 +20,7 @@ const {
         }
     },
     "/profile": require("./scenes/Profile.scene").default,
+    "/call": require("./scenes/Call.scene").default,
 }, {
     initialRouteName: "/home",
     initialRouteParams: {}

@@ -1,9 +1,8 @@
 import scale from './scale';
 
 export default {
-    small: 12 * scale,
-    normal: 14 * scale,
-    large: 16 * scale,
-    huge: 18 * scale,
-    icon: 30 * scale
+    extraSmall: scale(6),
+    small: scale(12),
+    normal: scale(14),
+    large: scale(16)
 };

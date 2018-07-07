@@ -1,101 +1,92 @@
-import { NativeModules, Alert, Platform } from 'react-native';
+import { NativeModules, Alert, Platform, NetInfo } from 'react-native';
 import ServiceProvider from '../Support/ServiceProvider';
 
 class CodePushService extends ServiceProvider {
 
     async register() {
 
+        this.app.booted(async () => {
+            const codePush = require("react-native-code-push");
+
+            // thông báo cho code push app vẫn còn chạy ))
+            await codePush.notifyAppReady();
+        });
+    }
+
+    async boot() {
+
         const codePush = require("react-native-code-push");
-        await new Promise((resolve, reject) => {
-            
-            this.app.getBootProgess().createStep("CodePush", async (updatePeriod) => {
-                
-                const configs = this.app.configs("codePush") || {};
-                const {
-                    
-                    // cài đặt ngay sau khi download dùng cho package bắt buộc
-                    resolvedInstallMode = codePush.InstallMode.IMMEDIATE,
 
-                    // số giây tối thiểu ứng dụng cần phải chạy nền trước khi khởi động lại
-                    minimumBackgroundDuration = 60 * 5,
+        try {
 
-                    // hàm callback khi khởi động lần đầu
-                    firstRunCallback,
+            const isConnected = await NetInfo.isConnected.fetch();
 
-                    // cho phép xoá cache
-                    clearCache,
-                    
-                    // danh sách cache bỏ qua khi xoá
-                    cacheWhitelist = [],
-                    
-                    // hàm tạo message thông báo
-                    generateMessage,
+            if (isConnected) {
 
-                    // key
-                    deploymentKey = null,
+                // chờ checking codepush xong mới pass qua bước này
+                await new Promise((resolve, reject) => {
 
-                    binaryVersionMismatchCallback
-                } = configs;
+                    this.app.getBootProgess().createStep("CodePush", async (updatePeriod) => {
 
-                // cập nhật trạng thái step
-                updatePeriod(0, {
-                    description: "checking_for_update",
-                    state: codePush.SyncStatus.CHECKING_FOR_UPDATE,
-                    resolvedInstallMode,
-                    minimumBackgroundDuration
-                });
+                        const configs = this.app.configs("codePush") || {};
+                        const {
 
-                // lấy package hiện tại
-                let currentPackage = await codePush.getCurrentPackage();
-                // lấy package trên server
-                let remotePackage = await codePush.checkForUpdate(deploymentKey, (remotePackage) => {
+                            // cài đặt ngay sau khi download dùng cho package bắt buộc
+                            resolvedInstallMode = codePush.InstallMode.IMMEDIATE,
 
-                    console.log(remotePackage);
-                    binaryVersionMismatchCallback && binaryVersionMismatchCallback(remotePackage);
-                });
+                            // số giây tối thiểu ứng dụng cần phải chạy nền trước khi khởi động lại
+                            minimumBackgroundDuration = 60 * 5,
 
-                // kiểm tra bản mới đã từng cài đặt bị lỗi
-                const updateShouldBeIgnored = remotePackage && remotePackage.failedInstall;
+                            // hàm callback khi khởi động lần đầu
+                            firstRunCallback,
 
-                // nếu không có bản mới hoặc bản mới bị lỗi
-                if (!remotePackage || updateShouldBeIgnored) {
+                            // cho phép xoá cache
+                            clearCache,
 
-                    if (currentPackage) {
+                            // danh sách cache bỏ qua khi xoá
+                            cacheWhitelist = [],
 
-                        // nếu là chưa cài đặt
-                        if (currentPackage.isPending) {
+                            // hàm tạo message thông báo
+                            generateMessage,
 
-                            // cài đặt sau khi khởi động lại
-                            updatePeriod(1, {
-                                description: "update_installed",
-                                state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                isPending: currentPackage && currentPackage.isPending,
-                                isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                currentPackage,
-                                remotePackage,
-                                updateShouldBeIgnored,
-                                resolvedInstallMode,
-                                minimumBackgroundDuration
+                            // key
+                            deploymentKey = null,
+
+                            binaryVersionMismatchCallback
+                        } = configs;
+
+                        // cập nhật trạng thái step
+                        updatePeriod(0, {
+                            description: "checking_for_update",
+                            state: codePush.SyncStatus.CHECKING_FOR_UPDATE,
+                            resolvedInstallMode,
+                            minimumBackgroundDuration
+                        });
+
+                        try {
+
+                            // lấy package hiện tại
+                            let currentPackage = await codePush.getCurrentPackage();
+                            // lấy package trên server
+                            let remotePackage = await codePush.checkForUpdate(deploymentKey, (remotePackage) => {
+
+                                binaryVersionMismatchCallback && binaryVersionMismatchCallback(remotePackage);
                             });
-                            resolve(codePush.SyncStatus.UPDATE_INSTALLED);
-                            return;
-                        }
 
-                        // nếu là lần chạy đầu tiên
-                        if (currentPackage.isFirstRun) {
+                            // kiểm tra bản mới đã từng cài đặt bị lỗi
+                            const updateShouldBeIgnored = remotePackage && remotePackage.failedInstall;
 
-                            try {
+                            // nếu không có bản mới hoặc bản mới bị lỗi
+                            if (!remotePackage || updateShouldBeIgnored) {
 
-                                // callback first run
-                                firstRunCallback && firstRunCallback(codePush.SyncStatus.UPDATE_INSTALLED);
+                                if (currentPackage) {
 
-                                if (clearCache) {
+                                    // nếu là chưa cài đặt
+                                    if (currentPackage.isPending) {
 
-                                    const cacheManager = app("cacheManager");
-                                    if (cacheManager) {
-
-                                        updatePeriod(0.8, {
-                                            description: "clear_cache",
+                                        // cài đặt sau khi khởi động lại
+                                        updatePeriod(1, {
+                                            description: "update_installed",
                                             state: codePush.SyncStatus.UPDATE_INSTALLED,
                                             isPending: currentPackage && currentPackage.isPending,
                                             isFirstRun: currentPackage && currentPackage.isFirstRun,
@@ -105,171 +96,27 @@ class CodePushService extends ServiceProvider {
                                             resolvedInstallMode,
                                             minimumBackgroundDuration
                                         });
-    
-                                        await cacheManager.clearAll({
-                                            whitelist: cacheWhitelist
-                                        });
-                                    } else {
-
-                                        this.app.booted(() => {
-
-                                            if (app("cacheManager")) {
-                                                app("cacheManager").clearAll({
-                                                    whitelist: cacheWhitelist
-                                                });
-                                            }
-                                        });
+                                        resolve(codePush.SyncStatus.UPDATE_INSTALLED);
+                                        return;
                                     }
-                                }
-                            } catch (e) {}
 
-                            // cài đặt thành công
-                            updatePeriod(1, {
-                                description: "update_successfully",
-                                state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                isPending: currentPackage && currentPackage.isPending,
-                                isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                currentPackage,
-                                remotePackage,
-                                updateShouldBeIgnored,
-                                resolvedInstallMode,
-                                minimumBackgroundDuration
-                            });
-                            resolve(codePush.SyncStatus.UPDATE_INSTALLED);
+                                    // nếu là lần chạy đầu tiên
+                                    if (currentPackage.isFirstRun) {
 
-                            if (this.app.restart) {
+                                        try {
 
-                                this.app.restart();
-                            } else {
+                                            // callback first run
+                                            firstRunCallback && firstRunCallback(codePush.SyncStatus.UPDATE_INSTALLED);
 
-                                codePush.restartApp();
-                            }
-                            return;
-                        }
-                    }
-                    
+                                            // nếu cho phép xoá cache
+                                            if (clearCache) {
 
-                    // đã là phiên bản mới nhất
-                    updatePeriod(1, {
-                        description: "up_to_date",
-                        state: codePush.SyncStatus.UP_TO_DATE,
-                        isPending: currentPackage && currentPackage.isPending,
-                        isFirstRun: currentPackage && currentPackage.isFirstRun,
-                        currentPackage,
-                        remotePackage,
-                        updateShouldBeIgnored,
-                        resolvedInstallMode,
-                        minimumBackgroundDuration
-                    });
-                    
-                    resolve(codePush.SyncStatus.UP_TO_DATE);
-                    return;
-                }
+                                                const cacheManager = app("cacheManager");
+                                                if (cacheManager) {
 
-                // nếu có bản cập nhật
-                if (remotePackage) {
-
-                    if (
-                        remotePackage.failedInstall
-                        && currentPackage
-                        && currentPackage.isFirstRun
-                    ) {
-
-                        // callback first run
-                        firstRunCallback && firstRunCallback(codePush.SyncStatus.UNKNOWN_ERROR);
-
-                        // cài đặt không thành công
-                        updatePeriod(1, {
-                            description: "update_failed",
-                            state: codePush.SyncStatus.UNKNOWN_ERROR,
-                            isPending: currentPackage && currentPackage.isPending,
-                            isFirstRun: currentPackage && currentPackage.isFirstRun,
-                            currentPackage,
-                            remotePackage,
-                            updateShouldBeIgnored,
-                            resolvedInstallMode,
-                            minimumBackgroundDuration
-                        });
-                        resolve(codePush.SyncStatus.UNKNOWN_ERROR);
-                        return;
-                    }
-
-                    // nếu có download url
-                    if (remotePackage.download && remotePackage.downloadUrl) {
-
-                        // xử lý version name
-                        let newVersion = `${remotePackage.appVersion}-${remotePackage.label.replace(/\D+/, "")}`;
-
-                        const {
-                            optional_update_title,
-                            mandatory_update_title,
-                            title = `New version: ${newVersion}`,
-                            mandatory_update_message,
-                            optional_update_message,
-                            message = remotePackage.description,
-                            optional_ignore_button_label,
-                            optional_install_button_label,
-                            ignore_label = "ignore",
-                            install_label = "install"
-                        } = generateMessage(newVersion, {
-                            remotePackage,
-                            currentPackage
-                        });
-                        try {
-
-                            await new Promise((res, rej) => {
-
-                                // nút nhấn
-                                let buttons = [
-                                    {
-                                        text: optional_install_button_label || install_label || "install",
-                                        onPress: async () => {
-
-                                            try {
-
-                                                updatePeriod(0, {
-                                                    package: "0%",
-                                                    description: "downloading",
-                                                    state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
-                                                    isPending: currentPackage && currentPackage.isPending,
-                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                                    currentPackage,
-                                                    remotePackage,
-                                                    updateShouldBeIgnored,
-                                                    resolvedInstallMode,
-                                                    minimumBackgroundDuration
-                                                });
-
-                                                // download package
-                                                let localPackage = await remotePackage.download(({
-                                                    totalBytes: totalByte = 0,
-                                                    receivedBytes: currentByte = 0
-                                                }) => {
-
-                                                    let period = totalByte !== 0 ? (currentByte / totalByte) : 0;
-
-                                                    updatePeriod(Math.min(period, 0.99), {
-                                                        package: `${period * 100}%`,
-                                                        totalBytes: totalByte,
-                                                        receivedBytes: currentByte,
-                                                        description: "downloading",
-                                                        state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
-                                                        isPending: currentPackage && currentPackage.isPending,
-                                                        isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                                        currentPackage,
-                                                        remotePackage,
-                                                        updateShouldBeIgnored,
-                                                        resolvedInstallMode,
-                                                        minimumBackgroundDuration
-                                                    });
-                                                });
-
-                                                // nếu có install
-                                                if (localPackage && localPackage.install) {
-
-                                                    updatePeriod(0.99, {
-                                                        description: "installing_update",
-                                                        state: codePush.SyncStatus.INSTALLING_UPDATE,
+                                                    updatePeriod(0.8, {
+                                                        description: "clear_cache",
+                                                        state: codePush.SyncStatus.UPDATE_INSTALLED,
                                                         isPending: currentPackage && currentPackage.isPending,
                                                         isFirstRun: currentPackage && currentPackage.isFirstRun,
                                                         currentPackage,
@@ -279,70 +126,52 @@ class CodePushService extends ServiceProvider {
                                                         minimumBackgroundDuration
                                                     });
 
-                                                    await localPackage.install(resolvedInstallMode, minimumBackgroundDuration, () => {
+                                                    await cacheManager.clearAll({
+                                                        whitelist: cacheWhitelist
+                                                    });
+                                                } else {
 
-                                                        updatePeriod(0.99, {
-                                                            description: "update_installed",
-                                                            state: codePush.SyncStatus.UPDATE_INSTALLED,
-                                                            isPending: currentPackage && currentPackage.isPending,
-                                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                                            currentPackage,
-                                                            remotePackage,
-                                                            updateShouldBeIgnored,
-                                                            resolvedInstallMode,
-                                                            minimumBackgroundDuration
-                                                        });
-                                                        res(codePush.SyncStatus.UPDATE_INSTALLED);
+                                                    this.app.booted(() => {
+
+                                                        if (app("cacheManager")) {
+                                                            app("cacheManager").clearAll({
+                                                                whitelist: cacheWhitelist
+                                                            });
+                                                        }
                                                     });
                                                 }
-                                            } catch (error) {
-
-                                                updatePeriod(1, {
-                                                    description: "update_failed",
-                                                    state: codePush.SyncStatus.UNKNOWN_ERROR,
-                                                    isPending: currentPackage && currentPackage.isPending,
-                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                                    currentPackage,
-                                                    remotePackage,
-                                                    updateShouldBeIgnored,
-                                                    resolvedInstallMode,
-                                                    minimumBackgroundDuration
-                                                });
-                                                error.code = codePush.SyncStatus.UNKNOWN_ERROR;
-                                                rej(error);
-                                                return;
                                             }
+                                        } catch (e) { }
+
+                                        // cài đặt thành công
+                                        updatePeriod(1, {
+                                            description: "update_successfully",
+                                            state: codePush.SyncStatus.UPDATE_INSTALLED,
+                                            isPending: currentPackage && currentPackage.isPending,
+                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                            currentPackage,
+                                            remotePackage,
+                                            updateShouldBeIgnored,
+                                            resolvedInstallMode,
+                                            minimumBackgroundDuration
+                                        });
+                                        resolve(codePush.SyncStatus.UPDATE_INSTALLED);
+
+                                        if (this.app.restart) {
+
+                                            this.app.restart();
+                                        } else {
+
+                                            codePush.restartApp();
                                         }
+                                        return;
                                     }
-                                ];
-
-                                // nếu phiên bản không bắt buộc
-                                if (!remotePackage.isMandatory) {
-
-                                    // thêm nút bỏ qua
-                                    buttons.push({
-                                        text: optional_ignore_button_label || ignore_label || "ignore",
-                                        onPress: () => {
-
-                                            updatePeriod(1, {
-                                                description: "update_ignored",
-                                                state: codePush.SyncStatus.UPDATE_IGNORED,
-                                                isPending: currentPackage && currentPackage.isPending,
-                                                isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                                currentPackage,
-                                                remotePackage,
-                                                updateShouldBeIgnored,
-                                                resolvedInstallMode,
-                                                minimumBackgroundDuration
-                                            });
-                                            res(codePush.SyncStatus.UPDATE_IGNORED);
-                                        }
-                                    });
                                 }
 
-                                updatePeriod(0.1, {
-                                    description: "awaiting_user_action",
-                                    state: codePush.SyncStatus.AWAITING_USER_ACTION,
+                                // đã là phiên bản mới nhất
+                                updatePeriod(1, {
+                                    description: "up_to_date",
+                                    state: codePush.SyncStatus.UP_TO_DATE,
                                     isPending: currentPackage && currentPackage.isPending,
                                     isFirstRun: currentPackage && currentPackage.isFirstRun,
                                     currentPackage,
@@ -351,25 +180,251 @@ class CodePushService extends ServiceProvider {
                                     resolvedInstallMode,
                                     minimumBackgroundDuration
                                 });
-                                
-                                // thông báo
-                                AlertAdapter.alert(
-                                    (
-                                        remotePackage.isMandatory ? 
-                                            mandatory_update_title 
-                                        : optional_update_title
-                                    ) || title || `New version: ${newVersion}`,
-                                    (
-                                        remotePackage.isMandatory ?
-                                            mandatory_update_message
-                                            : optional_update_message
-                                    ) || message || remotePackage.description
-                                );
-                            });
+
+                                resolve(codePush.SyncStatus.UP_TO_DATE);
+                                return;
+                            }
+
+                            // nếu có bản cập nhật
+                            if (remotePackage) {
+
+                                if (
+                                    remotePackage.failedInstall
+                                    && currentPackage
+                                    && currentPackage.isFirstRun
+                                ) {
+
+                                    // callback first run
+                                    firstRunCallback && firstRunCallback(codePush.SyncStatus.UNKNOWN_ERROR);
+
+                                    // cài đặt không thành công
+                                    updatePeriod(1, {
+                                        description: "update_failed",
+                                        state: codePush.SyncStatus.UNKNOWN_ERROR,
+                                        isPending: currentPackage && currentPackage.isPending,
+                                        isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                        currentPackage,
+                                        remotePackage,
+                                        updateShouldBeIgnored,
+                                        resolvedInstallMode,
+                                        minimumBackgroundDuration
+                                    });
+                                    resolve(codePush.SyncStatus.UNKNOWN_ERROR);
+                                    return;
+                                }
+
+                                // nếu có download url
+                                if (remotePackage.download && remotePackage.downloadUrl) {
+
+                                    // xử lý version name
+                                    let newVersion = `${remotePackage.appVersion}-${remotePackage.label.replace(/\D+/, "")}`;
+
+                                    const {
+                                        optional_update_title,
+                                        mandatory_update_title,
+                                        title = `New version: ${newVersion}`,
+                                        mandatory_update_message,
+                                        optional_update_message,
+                                        message = remotePackage.description,
+                                        optional_ignore_button_label,
+                                        optional_install_button_label,
+                                        ignore_label = "ignore",
+                                        install_label = "install"
+                                    } = generateMessage(newVersion, {
+                                        remotePackage,
+                                        currentPackage
+                                    });
+
+                                    try {
+
+                                        // chờ người dùng chọn, và install xong
+                                        await new Promise((res, rej) => {
+
+                                            // nút nhấn
+                                            let buttons = [
+                                                {
+                                                    text: optional_install_button_label || install_label || "install",
+                                                    onPress: async () => {
+
+                                                        try {
+
+                                                            updatePeriod(0, {
+                                                                package: "0%",
+                                                                description: "downloading",
+                                                                state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
+                                                                isPending: currentPackage && currentPackage.isPending,
+                                                                isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                                currentPackage,
+                                                                remotePackage,
+                                                                updateShouldBeIgnored,
+                                                                resolvedInstallMode,
+                                                                minimumBackgroundDuration
+                                                            });
+
+                                                            // download package
+                                                            let localPackage = await remotePackage.download(({
+                                                                totalBytes: totalByte = 0,
+                                                                receivedBytes: currentByte = 0
+                                                            }) => {
+
+                                                                let period = totalByte !== 0 ? (currentByte / totalByte) : 0;
+
+                                                                updatePeriod(Math.min(period, 0.99), {
+                                                                    package: `${period * 100}%`,
+                                                                    totalBytes: totalByte,
+                                                                    receivedBytes: currentByte,
+                                                                    description: "downloading",
+                                                                    state: codePush.SyncStatus.DOWNLOADING_PACKAGE,
+                                                                    isPending: currentPackage && currentPackage.isPending,
+                                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                                    currentPackage,
+                                                                    remotePackage,
+                                                                    updateShouldBeIgnored,
+                                                                    resolvedInstallMode,
+                                                                    minimumBackgroundDuration
+                                                                });
+                                                            });
+
+                                                            // nếu có install
+                                                            if (localPackage && localPackage.install) {
+
+                                                                updatePeriod(0.99, {
+                                                                    description: "installing_update",
+                                                                    state: codePush.SyncStatus.INSTALLING_UPDATE,
+                                                                    isPending: currentPackage && currentPackage.isPending,
+                                                                    isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                                    currentPackage,
+                                                                    remotePackage,
+                                                                    updateShouldBeIgnored,
+                                                                    resolvedInstallMode,
+                                                                    minimumBackgroundDuration
+                                                                });
+
+                                                                await localPackage.install(resolvedInstallMode, minimumBackgroundDuration, () => {
+
+                                                                    updatePeriod(0.99, {
+                                                                        description: "update_installed",
+                                                                        state: codePush.SyncStatus.UPDATE_INSTALLED,
+                                                                        isPending: currentPackage && currentPackage.isPending,
+                                                                        isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                                        currentPackage,
+                                                                        remotePackage,
+                                                                        updateShouldBeIgnored,
+                                                                        resolvedInstallMode,
+                                                                        minimumBackgroundDuration
+                                                                    });
+                                                                    res(codePush.SyncStatus.UPDATE_INSTALLED);
+                                                                });
+                                                            }
+                                                        } catch (error) {
+
+                                                            updatePeriod(1, {
+                                                                description: "update_failed",
+                                                                state: codePush.SyncStatus.UNKNOWN_ERROR,
+                                                                isPending: currentPackage && currentPackage.isPending,
+                                                                isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                                currentPackage,
+                                                                remotePackage,
+                                                                updateShouldBeIgnored,
+                                                                resolvedInstallMode,
+                                                                minimumBackgroundDuration
+                                                            });
+                                                            error.code = codePush.SyncStatus.UNKNOWN_ERROR;
+                                                            rej(error);
+                                                            return;
+                                                        }
+                                                    }
+                                                }
+                                            ];
+
+                                            // nếu phiên bản không bắt buộc
+                                            if (!remotePackage.isMandatory) {
+
+                                                // thêm nút bỏ qua
+                                                buttons.push({
+                                                    text: optional_ignore_button_label || ignore_label || "ignore",
+                                                    onPress: () => {
+
+                                                        updatePeriod(1, {
+                                                            description: "update_ignored",
+                                                            state: codePush.SyncStatus.UPDATE_IGNORED,
+                                                            isPending: currentPackage && currentPackage.isPending,
+                                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                            currentPackage,
+                                                            remotePackage,
+                                                            updateShouldBeIgnored,
+                                                            resolvedInstallMode,
+                                                            minimumBackgroundDuration
+                                                        });
+                                                        res(codePush.SyncStatus.UPDATE_IGNORED);
+                                                    }
+                                                });
+                                            }
+
+                                            updatePeriod(0.1, {
+                                                description: "awaiting_user_action",
+                                                state: codePush.SyncStatus.AWAITING_USER_ACTION,
+                                                isPending: currentPackage && currentPackage.isPending,
+                                                isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                                currentPackage,
+                                                remotePackage,
+                                                updateShouldBeIgnored,
+                                                resolvedInstallMode,
+                                                minimumBackgroundDuration
+                                            });
+
+                                            // thông báo
+                                            AlertAdapter.alert(
+                                                (
+                                                    remotePackage.isMandatory ?
+                                                        mandatory_update_title
+                                                        : optional_update_title
+                                                ) || title || `New version: ${newVersion}`,
+                                                (
+                                                    remotePackage.isMandatory ?
+                                                        mandatory_update_message
+                                                        : optional_update_message
+                                                ) || message || remotePackage.description
+                                            );
+                                        });
+
+                                        updatePeriod(1, {
+                                            description: "update_successfully",
+                                            state: codePush.SyncStatus.UPDATE_INSTALLED,
+                                            isPending: currentPackage && currentPackage.isPending,
+                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                            currentPackage,
+                                            remotePackage,
+                                            updateShouldBeIgnored,
+                                            resolvedInstallMode,
+                                            minimumBackgroundDuration
+                                        });
+                                        resolve(codePush.SyncStatus.UPDATE_INSTALLED);
+                                        return;
+
+                                    } catch (error) {
+
+                                        updatePeriod(1, {
+                                            description: "update_failed",
+                                            state: codePush.SyncStatus.UNKNOWN_ERROR,
+                                            isPending: currentPackage && currentPackage.isPending,
+                                            isFirstRun: currentPackage && currentPackage.isFirstRun,
+                                            currentPackage,
+                                            remotePackage,
+                                            updateShouldBeIgnored,
+                                            resolvedInstallMode,
+                                            minimumBackgroundDuration
+                                        });
+                                        // reject(codePush.SyncStatus.UNKNOWN_ERROR);
+                                        reject(error);
+                                        return;
+                                    }
+                                }
+                            }
 
                             updatePeriod(1, {
-                                description: "update_successfully",
-                                state: codePush.SyncStatus.UPDATE_INSTALLED,
+                                description: "up_to_date",
+                                state: codePush.SyncStatus.UP_TO_DATE,
                                 isPending: currentPackage && currentPackage.isPending,
                                 isFirstRun: currentPackage && currentPackage.isFirstRun,
                                 currentPackage,
@@ -378,55 +433,23 @@ class CodePushService extends ServiceProvider {
                                 resolvedInstallMode,
                                 minimumBackgroundDuration
                             });
-                            resolve(codePush.SyncStatus.UPDATE_INSTALLED);
-                            return;
+                            resolve(codePush.SyncStatus.UP_TO_DATE);
 
                         } catch (error) {
 
-                            updatePeriod(1, {
-                                description: "update_failed",
-                                state: codePush.SyncStatus.UNKNOWN_ERROR,
-                                isPending: currentPackage && currentPackage.isPending,
-                                isFirstRun: currentPackage && currentPackage.isFirstRun,
-                                currentPackage,
-                                remotePackage,
-                                updateShouldBeIgnored,
-                                resolvedInstallMode,
-                                minimumBackgroundDuration
-                            });
-                            reject(codePush.SyncStatus.UNKNOWN_ERROR);
-                            return;
+                            reject(error);
                         }
-                    }
-                }
-
-                updatePeriod(1, {
-                    description: "up_to_date",
-                    state: codePush.SyncStatus.UP_TO_DATE,
-                    isPending: currentPackage && currentPackage.isPending,
-                    isFirstRun: currentPackage && currentPackage.isFirstRun,
-                    currentPackage,
-                    remotePackage,
-                    updateShouldBeIgnored,
-                    resolvedInstallMode,
-                    minimumBackgroundDuration
+                    }, {
+                            description: "init",
+                            state: codePush.SyncStatus.CHECKING_FOR_UPDATE
+                    });
                 });
-                resolve(codePush.SyncStatus.UP_TO_DATE);
-            }, {
-                description: "init",
-                state: codePush.SyncStatus.CHECKING_FOR_UPDATE
-            });
-        });
+            }
 
-        console.log('register code push');
-    }
+        } catch (error) {
 
-    async boot() {
-
-        const codePush = require("react-native-code-push");
-
-        // thông báo cho code push app vẫn còn chạy ))
-        await codePush.notifyAppReady();
+            AlertAdapter.alert("Update fail", error.message);
+        }
     }
 }
 

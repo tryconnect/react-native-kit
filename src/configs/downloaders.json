@@ -1,0 +1,12 @@
+{
+    "images": {
+        "fileCache": false,
+        "method": "GET",
+        "cache": "images"
+    },
+    "translations": {
+        "fileCache": false,
+        "method": "GET",
+        "cache": "translations"
+    }
+}

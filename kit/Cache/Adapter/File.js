@@ -2,6 +2,7 @@ import { Platform, PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import md5 from 'crypto-js/md5';
 import mixins from '../mixins';
+import throttledPromise from '../../Utilities/throttledPromise';
 
 const DEFAULT_CONFIGS = {
     keepExt: true,
@@ -13,7 +14,9 @@ const DEFAULT_CONFIGS = {
         || RNFS.MainBundlePath
         || RNFS.LibraryDirectoryPath
         || RNFS.ExternalStorageDirectoryPath
-        || RNFS.ExternalDirectoryPath
+        || RNFS.ExternalDirectoryPath,
+    timeout: 60000,
+    timeoutMessage: "Cache timeout"
 };
 
 class FileCache {
@@ -79,10 +82,18 @@ class FileCache {
 
             throw new Error('Permistion denined');
         }
-        const exists = await RNFS.exists(path);
+        const exists = await throttledPromise(
+            RNFS.exists, 
+            this.configs.timeout,
+            this.configs.timeoutMessage
+        )(path);
         if (!exists) {
 
-            await RNFS.mkdir(path, MkdirOptions);
+            await throttledPromise(
+                RNFS.mkdir,
+                this.configs.timeout,
+                this.configs.timeoutMessage
+            )(path, MkdirOptions);
         }
     }
 
@@ -141,7 +152,11 @@ class FileCache {
 
                     throw new Error('Permistion denined');
                 }
-                const exists = await RNFS.exists(path.replace(FILE_PREFIX, ""));
+                const exists = await throttledPromise(
+                    RNFS.exists, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(path.replace(FILE_PREFIX, ""));
 
                 if (exists) {
                     return resolve(path);
@@ -170,10 +185,18 @@ class FileCache {
                     throw new Error('Permistion denined');
                 }
 
-                const exists = await RNFS.exists(path.replace(FILE_PREFIX, ""));
+                const exists = await throttledPromise(
+                    RNFS.exists, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(path.replace(FILE_PREFIX, ""));
                 if (exists) {
 
-                    const file = await RNFS.readFile(path.replace(FILE_PREFIX, ""), encoding);
+                    const file = await throttledPromise(
+                        RNFS.readFile, 
+                        this.configs.timeout,
+                        this.configs.timeoutMessage
+                    )(path.replace(FILE_PREFIX, ""), encoding);
                     resolve(file);
                 }
 
@@ -193,13 +216,21 @@ class FileCache {
             try {
 
                 let path = `${this.path}`.replace(FILE_PREFIX, "");
-                const exists = await RNFS.exists(path);
+                const exists = await throttledPromise(
+                    RNFS.exists, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(path);
                 if (!exists) {
 
                     return resolve([]);
                 }
 
-                let allPaths = await RNFS.readDir(path);
+                let allPaths = await throttledPromise(
+                    RNFS.readDir, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(path);
                 allPaths = allPaths || [];
                 allPaths = allPaths.map(f => {
 
@@ -269,7 +300,11 @@ class FileCache {
                     throw new Error('Permistion denined');
                 }
 
-                res = await RNFS.writeFile(realPath, data, encoding);
+                res = await throttledPromise(
+                    RNFS.writeFile, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(realPath, data, encoding);
 
                 resolve(path);
             } catch (error) {
@@ -291,7 +326,11 @@ class FileCache {
 
                     throw new Error('Permistion denined');
                 }
-                await RNFS.unlink(path.replace(FILE_PREFIX, ""));
+                await throttledPromise(
+                    RNFS.unlink, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(path.replace(FILE_PREFIX, ""));
 
                 resolve(path);
             } catch (error) {
@@ -313,13 +352,62 @@ class FileCache {
                     throw new Error('Permistion denined');
                 }
                 
-                await RNFS.unlink(`${this.path}`.replace(FILE_PREFIX, ""));
+                await throttledPromise(
+                    RNFS.unlink, 
+                    this.configs.timeout,
+                    this.configs.timeoutMessage
+                )(`${this.path}`.replace(FILE_PREFIX, ""));
 
                 resolve(this.path);
             } catch (error) {
                 reject(error);
             }
         });
+    }
+
+    async getItem(key, callback) {
+
+        try {
+
+            let hasCache = await this.has(key);
+            if (!hasCache) {
+
+                callback && callback(null, undefined);
+                return undefined;
+            }
+            let result = await this.get(hasCache, "utf8");
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async setItem(key, value, callback) {
+
+        try {
+
+            let result = await this.put(key, value, "utf8");
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
+    }
+
+    async removeItem(key, callback) {
+
+        try {
+
+            let result = await this.delete(key);
+            callback && callback(null, result);
+            return result;
+        } catch (error) {
+            callback && callback(error);
+            throw error;
+        }
     }
 }
 

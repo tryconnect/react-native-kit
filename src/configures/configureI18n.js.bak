@@ -1,0 +1,202 @@
+import { AsyncStorage } from 'react-native';
+import I18n from '~/library/i18n/I18n';
+import { defaultLocale, locales, fallbacks, syncKey } from '~/configs/i18n';
+import Downloader from '~/library/Downloader';
+import DeviceInfo from 'react-native-device-info';
+
+// hàm lấy Translation tĩnh
+export const requireTranslation = (locale) => {
+
+    var translation = {};
+    switch (locale) {
+        case "vi":
+            translation = {
+                ...require("~/data/translations/vi").data
+            };
+            // if(__DEV__) {
+                translation = {
+                    ...translation,
+                    ...require("~/server-side/translations/vi")
+                };
+            // }
+            break;
+        case "en":
+            translation = {
+                ...require("~/data/translations/en").data
+            };
+            // if (__DEV__) {
+                translation = {
+                    ...translation,
+                    ...require("~/server-side/translations/en")
+                };
+            // }
+            break;
+    }
+
+    return translation;
+};
+
+/**
+ * @todo hàm set lại dữ liệu ngôn ngữ
+ */
+const setTranslation = (locale, data) => {
+
+    var translation = I18n.getTranslation(locale) || {};
+    data = data || {};
+
+    I18n.setTranslation(locale, {
+        ...translation,
+        ...data
+    });
+};
+
+/**
+ * @todo hàm khởi tạo ngôn ngữ
+ */
+const initTranslation = () => {
+
+    // require các locale tĩnh
+    for (let key in locales) {
+        if (locales.hasOwnProperty(key)) {
+
+            I18n.setTranslation(key, requireTranslation(key));
+        }
+    }
+};
+
+// init
+I18n.defaultLocale = defaultLocale;
+I18n.fallbacks = fallbacks;
+
+initTranslation();
+
+// các ngôn ngữ đã được download
+// I18n.translationLoaded = [];
+
+// hàm lấy ngôn ngữ hiện tại
+const getCurrentLocale = async () => {
+
+    // set lại ngôn ngữ
+    var currentLocale = I18n.locale;
+    try {
+        var currentLocale = await AsyncStorage.getItem(syncKey);
+        currentLocale = currentLocale || DeviceInfo.getDeviceLocale();
+    } catch (e) {}
+
+    currentLocale = I18n.lookupWithoutFallback(currentLocale, locales) || defaultLocale;
+    return currentLocale;
+};
+
+export default async ( Cache, configs = {} ) => {
+
+    configs = configs || {};
+    
+    // khởi tạo downloader
+    const downloader = new Downloader(configs, Cache);
+
+    // hàm download ngôn ngữ từ server về
+    I18n.loadTranslation = async (locale, downloadCallback) => {
+
+        downloadCallback = downloadCallback || configs.downloadCallback;
+
+        // kiểm tra support
+        locale = I18n.lookupWithoutFallback(locale, locales) || defaultLocale;
+        // lấy đường dẫn download
+        const urlDownload = locales[locale];
+        if (!urlDownload) {
+            return;
+        }
+
+        var data = {};
+
+        try {
+
+            // kiểm tra cache
+            const hasCache = await Cache.has(urlDownload);
+            if (!hasCache) {
+
+                // download
+                const res = await downloader.download(urlDownload, {
+                    progress: (progress) => {
+                        downloadCallback && downloadCallback(locale, progress);
+                    }
+                });
+            }
+
+            // lấy dữ liệu từ cache
+            data = await Cache.get(urlDownload);
+
+        } catch (e) {}
+
+        // parse
+        if (typeof data !== "object") {
+
+            try {
+                data = JSON.parse(data);
+            } catch (e) {}
+        }
+
+        // // set lại dữ liệu
+        // return setTranslation(locale, data);
+        return data;
+    };
+
+    // sự kiện thay đổi ngôn ngữ
+    const onChangeLocale = async (locale) => {
+
+        if (
+            I18n.loadTranslation
+            //  && (
+            //      !I18n.translationLoaded 
+            //      || !I18n.translationLoaded.includes(locale)
+            //  )
+        ) {
+
+            try {
+                
+                // download
+                const data = await I18n.loadTranslation(locale);
+
+                // clear các dữ liệu ngôn ngữ khác
+                // initTranslation();
+
+                // set lại dữ liệu ngôn ngữ hiện tại
+                setTranslation(locale, {
+                    ...I18n.getTranslation(locale),
+                    ...data
+                });
+
+                // cache
+                // I18n.translationLoaded.push(locale);
+            } catch (error) {}
+        }
+    };
+
+    // sự kiện thay đổi ngôn ngữ
+    I18n.configLocale = async (locale) => {
+
+        try {
+            
+            await onChangeLocale(locale);
+            await AsyncStorage.setItem(syncKey, locale);
+        } catch (error) {}
+    };
+
+    // sự kiện thay đổi ngôn ngữ mặc định
+    I18n.configDefaultLocale = onChangeLocale;
+
+    // init
+    I18n.locale = I18n.defaultLocale;
+
+    try {
+
+        // init ngôn ngữ hiện tại
+        // var currentLocale = await getCurrentLocale();
+        // await I18n.loadTranslation(currentLocale);
+        // I18n.locale = currentLocale;
+        I18n.locale = "vi";
+
+    } catch (error) {}
+
+    return currentLocale;
+};

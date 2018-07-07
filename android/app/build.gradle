@@ -124,6 +124,7 @@ android {
         // tên app
         resValue "string", "app_name", rootProject.appName
         buildConfigField "String", "APP_NAME", '"' + rootProject.appName + '"'
+        buildConfigField "String", "APP_ID", '"' + rootProject.applicationId + '"'
 
         resValue "string", "supportLibVersion", rootProject.supportLibVersion
 
@@ -243,6 +244,7 @@ dependencies {
     compile project(':react-native-onesignal')
     compile project(':react-native-image-picker')
     compile project(':react-native-google-signin')
+    compile project(':react-native-share')
     // compile project(':react-native-google-analytics-bridge')
     compile project(':react-native-fs')
     compile(project(':react-native-firebase')) {
@@ -263,7 +265,7 @@ dependencies {
 
     compile "com.android.support:multidex:1.0.3" // Degug failed for task ':app:transformClassesWithMultidexlistForDebug -- Enable Multidex for Apps with Over 64K Methods
 
-    compile 'com.stringee.sdk.android:stringee-android-sdk:1.2.9'
+    compile 'com.stringee.sdk.android:stringee-android-sdk:1.2.12'
 
     // RNFirebase required dependencies
     // compile 'com.google.firebase:firebase-perf:15.0.0'

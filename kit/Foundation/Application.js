@@ -93,17 +93,6 @@ class Application extends Container {
         });
     }
 
-    bind(abstract, concrete, shared) {
-
-        super.bind(abstract, concrete, shared);
-        let option = {
-            abstract,
-            concrete,
-            shared
-        };
-        this._bootProgess.createStep("app.bind", Promise.resolve(option), option);
-    }
-
     /**
      * @todo Hàm lấy queue khởi động
      */
@@ -165,6 +154,7 @@ class Application extends Container {
                 const boot = instance.boot.bind(instance);
 
                 instance.register = async () => {
+                    
                     await Promise.resolve(register());
                     await Promise.resolve(registerCallback());
                 };
@@ -395,6 +385,7 @@ class Application extends Container {
                 // boot
                 if(provider.boot) {
 
+                    this._bootProgess.createStep("app.provider.boot", Promise.resolve(provider), provider);
                     await Promise.resolve(provider.boot());
                 }
             }
@@ -437,6 +428,20 @@ class Application extends Container {
         }
 
         this._bootingCallbacks && this._bootingCallbacks.push(callback);
+
+        return {
+            remove: () => {
+
+                if (this._bootingCallbacks) {
+
+                    let indexOf = this._bootingCallbacks.indexOf(callback);
+                    if (indexOf !== -1) {
+    
+                        this._bootingCallbacks.splice(indexOf, 1);
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -457,6 +462,20 @@ class Application extends Container {
         }
 
         this._bootedCallbacks && this._bootedCallbacks.push(callback);
+
+        return {
+            remove: () => {
+
+                if (this._bootedCallbacks) {
+
+                    let indexOf = this._bootedCallbacks.indexOf(callback);
+                    if (indexOf !== -1) {
+    
+                        this._bootedCallbacks.splice(indexOf, 1);
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -471,6 +490,19 @@ class Application extends Container {
         }
 
         this._shuttingCallbacks.push(callback);
+        return {
+            remove: () => {
+
+                if (this._shuttingCallbacks) {
+
+                    let indexOf = this._shuttingCallbacks.indexOf(callback);
+                    if (indexOf !== -1) {
+    
+                        this._shuttingCallbacks.splice(indexOf, 1);
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -485,6 +517,19 @@ class Application extends Container {
         }
 
         this._startingCallbacks.push(callback);
+        return {
+            remove: () => {
+
+                if (this._startingCallbacks) {
+
+                    let indexOf = this._startingCallbacks.indexOf(callback);
+                    if (indexOf !== -1) {
+    
+                        this._startingCallbacks.splice(indexOf, 1);
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -619,28 +664,27 @@ class Application extends Container {
 
                 for (let index = 0; index < length; index++) {
 
-                    this._bootProgess.createStep("app.bootstrap.registerProvider", Promise.resolve(provider), provider);
-
+                    
                     // lấy service provider từ hằng đợi
                     let provider = await this._registerQueue.dequeue();
-                    
                     if(provider.register) {
-
+                        
+                        this._bootProgess.createStep("app.provider.register", Promise.resolve(provider), provider);
                         await Promise.resolve(provider.register());
                     }
 
                     if (provider.boot) {
 
-                        this._bootProgess.createStep("app.bootstrap.bootProvider", Promise.resolve(provider), provider);
-
+                        
                         // nếu app đang boot
                         if (this.isBooting()) {
                             
                             // đợi app boot xong thì gọi hàm boot
                             await new Promise((resolve) => {
-
+                                
                                 this.booted(async () => {
-
+                                    
+                                    this._bootProgess.createStep("app.provider.boot", Promise.resolve(provider), provider);
                                     // đợi hàm boot
                                     await Promise.resolve(provider.boot());
                                     resolve();
@@ -648,6 +692,7 @@ class Application extends Container {
                             });
                         } else if (this.isBooted()) { // nếu app đã boot
 
+                            this._bootProgess.createStep("app.provider.boot", Promise.resolve(provider), provider);
                             // gọi hàm boot
                             await Promise.resolve(provider.boot());
                         } else { // nếu app chưa boot
@@ -673,7 +718,7 @@ class Application extends Container {
                     // khởi tạo bootstrap
                     bootstrapper = this.make(bootstrapper);
                     
-                    this._bootProgess.createStep("app.bootstrap", Promise.resolve(bootstrappers), bootstrapper);
+                    this._bootProgess.createStep("app.bootstrap", Promise.resolve(bootstrapper), bootstrapper);
 
                     // đợi bootstrapped
                     await Promise.resolve(bootstrapper.bootstrap(this));
@@ -682,10 +727,14 @@ class Application extends Container {
                 }
             }
 
-            this._bootProgess.createStep("app.bootstrapped", Promise.resolve(bootstrappers), bootstrappers);
-
+            
             // thực thi hằng đợi đăng ký service provider sau khi đã bootstrap xong
             await runRegisterQueue(); 
+
+            this._bootProgess.createStep("app.bootstrapped", Promise.resolve(bootstrappers), bootstrappers);
+
+            this._bootProgess.createStep("app.started", Promise.resolve(this), this);
+
             // xoá hằng đợi
             delete this._registerQueue;
         } catch (error) {
@@ -706,8 +755,6 @@ class Application extends Container {
             });
             throw error;
         }
-
-        this._bootProgess.createStep("app.started", Promise.resolve(this), this);
     };
 
     /**
@@ -782,6 +829,14 @@ class Application extends Container {
         }
 
         AppRegistry.registerHeadlessTask(name, task);
+    }
+
+    ignoreWarnings(warnings) {
+
+        if (__DEV__) {
+            const YellowBox = require('react-native').YellowBox;
+            YellowBox.ignoreWarnings(warnings);
+        }
     }
 }
 

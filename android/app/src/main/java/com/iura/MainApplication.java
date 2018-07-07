@@ -28,6 +28,8 @@ import com.microsoft.codepush.react.CodePush;
 import com.centaurwarchief.smslistener.SmsListenerPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.airbnb.android.react.maps.MapsPackage;
+import cl.json.RNSharePackage;
+import cl.json.ShareApplication;
 
 import com.facebook.CallbackManager;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
@@ -53,7 +55,7 @@ import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import java.util.concurrent.TimeUnit;
 
-public class MainApplication extends Application implements ReactApplication {
+public class MainApplication extends Application implements ShareApplication, ReactApplication {
 
   private static CallbackManager mCallbackManager = CallbackManager.Factory.create();
 
@@ -98,7 +100,8 @@ public class MainApplication extends Application implements ReactApplication {
             new InCallManagerPackage(),
             new CallDetectionManager(),
             new RNCameraPackage(),
-            new MapsPackage()
+            new MapsPackage(),
+            new RNSharePackage()
       );
     }
 
@@ -107,6 +110,12 @@ public class MainApplication extends Application implements ReactApplication {
       return "index";
     }
   };
+
+  // react native share
+  @Override
+  public String getFileProviderAuthority() {
+    return BuildConfig.APP_ID;
+  }
 
   protected static CallbackManager getCallbackManager() {
     return mCallbackManager;

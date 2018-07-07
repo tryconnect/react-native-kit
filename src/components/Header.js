@@ -1,31 +1,38 @@
 "use strict";
 import React from 'react';
 import PropTypes from 'prop-types';
-import { View, TouchableOpacity, Text } from 'react-native';
-import { colors, scale, sizes, fontSizes } from '~/configs/styles';
+import { View } from 'react-native';
+import Text from '~/components/Text';
+import TouchableOpacity from '~/components/TouchableOpacity';
+import { scale, colors, sizes, fontSizes } from '~/configs/styles';
 import Icon from 'react-native-vector-icons/Ionicons';
+import mergeStyle from '~/kit/Utilities/mergeStyle';
 
 export default class Header extends React.Component {
 
     static displayName = "@Header";
 
-    static propsType = {
-        /* title: PropTypes.oneOfType([
-            PropsTypes.string,
+    static propTypes = {
+        title: PropTypes.oneOfType([
+            PropTypes.string,
             PropTypes.element
-        ]), */
+        ]),
         goBack: PropTypes.func,
-        headerRight: PropTypes.node,
         headerLeft: PropTypes.node,
-    }
+        headerRight: PropTypes.node,
+    };
 
     static defaultProps = {
         headerLeft: null,
-        headerRight: null
-    }
+        headerRight: null,
+    };
+
+    state = {
+    };
 
     constructor(props) {
         super(props);
+
     }
 
     render() {
@@ -37,55 +44,60 @@ export default class Header extends React.Component {
         } = this.props;
         return (
             <View style={[_styles.container]}>
-                {
-                    !!goBack &&
-                    <TouchableOpacity style={[_styles.touchIcon]}>
-                        <Icon style={_styles.icon} name="ios-arrow-round-back" />
-                    </TouchableOpacity>
-                }
-                {
-                    !!headerLeft &&
-                    <TouchableOpacity><Icon style={_styles.icon} name="ios-arrow-round-back" /></TouchableOpacity>
-                }
-                <View style={[_styles.title]}>
-                    <Text style={[_styles.textStyle]}>{title}</Text>
+                <View style={[_styles.leftItem]}>
                     {
-                        !!headerRight &&
+                        !!goBack &&
                         <TouchableOpacity>
-                            <Icon style={_styles.icon} name="ios-arrow-round-back" />
+                            <Icon size={20} name="ios-arrow-back" />
                         </TouchableOpacity>
                     }
+                    {
+                        !!headerLeft &&
+                        headerLeft
+                    }
                 </View>
+                {
+                    <Text style={[_styles.textStyle]}>{title.toUpperCase()}</Text>
+                }
+                {
+                    !!headerRight &&
+                    <View style={[_styles.rightItem]}>
+                        {headerRight}
+                    </View>
+                }
             </View>
         );
     }
-};
+    componentDidUpdate(nextProps, prevState, snapshot) {
 
+    }
 
-
+}
 
 const _styles = {
     container: {
-        borderWidth: 1 * scale,
-        borderColor: colors.pannelBorderColor,
-        borderRadius: 5 * scale,
-        alignItems: "center",
+        height: scale(30),
+        borderBottomWidth: sizes.border.rowItemBorderBottom,
+        borderBottomColor: colors.border.rowItemBorderBottomColor,
+        justifyContent: 'space-between',
         flexDirection: 'row',
-    },
-    touchIcon: {
-        width: 40 * scale,
-        height: 40 * scale,
-        justifyContent: "center",
-        alignItems: "center",
+        alignItems: 'center'
     },
     textStyle: {
-        fontWeight: 'bold',
-        fontSize: 15,
+        fontSize: fontSizes.normal,
+        color: colors.text.title,
+        fontWeight: 'bold'
     },
-    icon: {
-        fontSize: 30,
-        margin: 15 * scale
+    leftItem: {
+        justifyContent: 'space-between',
+        flex: 0.15,
+        marginLeft: 10,
+        flexDirection: 'row'
     },
-    title: { flex: 1, flexDirection: 'row', justifyContent: "space-between" }
+    rightItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        flex: 0.15,
+        marginRight: 10
+    }
 };
-

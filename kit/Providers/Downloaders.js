@@ -31,10 +31,6 @@ class DownloadersServiceProvider extends ServiceProvider {
             }
         }
     }
-
-    async boot() {
-
-    }
 }
 
 export default DownloadersServiceProvider;

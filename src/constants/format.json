@@ -1,0 +1,8 @@
+{
+    "NUMBER_MAXLENGTH": 19, // chiều dài tối đa của số
+    "PHONE_MAXLENGTH": 15, // chiều dài tối đa của số đt
+    "EMAIL_MAXLENGTH": 255,
+    "NUMBER_FORMAT": "0,0.[00000000000]", // định dạng number
+    "PRICE_FORMAT": "0,0.[000]", // định dạng tiền
+    "DATE_FORMAT": "DD/MM/YYYY" // định dạng ngày
+}

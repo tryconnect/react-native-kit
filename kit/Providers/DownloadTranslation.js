@@ -1,3 +1,4 @@
+import { NetInfo, Alert } from 'react-native';
 import ServiceProvider from '../Support/ServiceProvider';
 
 class DownloadTranslationServiceProvider extends ServiceProvider {
@@ -87,7 +88,25 @@ class DownloadTranslationServiceProvider extends ServiceProvider {
                     !translator.getTranslation(defaultLocale)
                     && !translator.getTranslation(locale)
                 ) {
+
+                    const isConnected = await NetInfo.isConnected.fetch();
+                    if (!isConnected) {
+
+                        Alert.alert("Network error", "Please check your connect!");
+                        await new Promise((resolve) => {
+
+                            const event = NetInfo.isConnected.addEventListener("connectionChange", (isConnected) => {
+                                
+                                if (isConnected) {
+
+                                    event && event.remove && event.remove();
+                                    resolve(isConnected);
+                                }
+                            });
+                        });
+                    }
                     
+                    // chờ download ngôn ngữ mặc định xong
                     await new Promise((resolve, reject) => {
 
                         this.app.getBootProgess().createStep("download.translation", async (updatePeriod) => {
@@ -139,10 +158,6 @@ class DownloadTranslationServiceProvider extends ServiceProvider {
                 }
             }
         }
-    }
-
-    async boot() {
-
     }
 
     /**

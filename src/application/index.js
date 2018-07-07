@@ -14,6 +14,10 @@ class Application extends React.Component {
             <Navigator />
         );
     }
+
+    componentDidMount() {
+
+    }
 }
 
 const _styles = {
